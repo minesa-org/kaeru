@@ -34,6 +34,8 @@
         "fs": "^0.0.1-security",
         "moment-timezone": "^0.6.0",
         "mongoose": "^8.10.1",
-        "node-fetch": "^3.3.2"
+        "node-fetch": "^3.3.2",
+        "@discordjs/voice": "^0.18.0",
+        "play-dl": "^1.8.1"
     }
 }
