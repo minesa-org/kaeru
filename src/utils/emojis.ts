@@ -80,6 +80,7 @@ export const emojis = {
 	document: { id: "1407670625677475850", name: "document" },
 	pencil: { id: "1407807672849403984", name: "pencil" },
 	eye: { id: "1407807605048479867", name: "eye" },
+	tag: { id: "1413588152488169482", name: "tag" },
 	stickers: {
 		thinking: { id: "1406027491403104316", name: "thinking" },
 		sleepy: { id: "1406027455294210128", name: "sleepy" },

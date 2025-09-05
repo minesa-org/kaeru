@@ -15,6 +15,7 @@ import type {
 	UserSelectMenuInteraction,
 	ChannelSelectMenuInteraction,
 	RoleSelectMenuInteraction,
+	AutocompleteInteraction,
 } from "discord.js";
 
 // === Command Interfaces ===
@@ -22,6 +23,7 @@ import type {
 interface BaseCommand<I extends Interaction = Interaction, D = any> {
 	data: D;
 	execute: (interaction: I) => Promise<any>;
+	autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 }
 
 type SlashBuilder = SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;

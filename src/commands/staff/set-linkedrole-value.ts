@@ -3,6 +3,7 @@ import {
 	ChatInputCommandInteraction,
 	InteractionContextType,
 	MessageFlags,
+	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js";
 import { BotCommand } from "../../interfaces/botTypes.js";
@@ -13,6 +14,7 @@ const setLinkedRoleValue: BotCommand = {
 	data: new SlashCommandBuilder()
 		.setContexts(InteractionContextType.Guild)
 		.setIntegrationTypes(ApplicationIntegrationType.GuildInstall)
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.setName("bağlı-rol-değeri-ayarla")
 		.setDescription("Kullanıcının bağlı rol sayaç değerini ayarla ")
 		.addUserOption(option =>

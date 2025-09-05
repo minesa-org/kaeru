@@ -229,8 +229,12 @@ const rewrite: BotCommand = {
 				break;
 
 			default:
-				await interaction.editReply(`${getEmoji("error")} Invalid subcommand.`);
-				break;
+				return sendAlertMessage({
+					interaction,
+					content: "It contains something not safe to share.",
+					type: "error",
+					tag: "AI Issue",
+				});
 		}
 
 		try {
@@ -259,8 +263,11 @@ const rewrite: BotCommand = {
 			);
 
 			await interaction.editReply({
-				content: output,
-				components: [row, containerTemplate({ tag: "Re-write", description: output })],
+				components: [
+					row,
+					containerTemplate({ tag: `${getEmoji("magic")} Re-writed Text`, description: output }),
+				],
+				flags: MessageFlags.IsComponentsV2,
 			});
 		} catch (err) {
 			log("error", "Failed to execute AI command:", err);
