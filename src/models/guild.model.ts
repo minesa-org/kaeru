@@ -1,5 +1,12 @@
 import { Schema, model, Document } from "mongoose";
 
+export interface IServerTag {
+	name: string;
+	content: string;
+	userId: string;
+	createdAt: Date;
+}
+
 export interface IGuild extends Document {
 	guildId: string;
 	staffRoleId?: string | null;
@@ -10,7 +17,15 @@ export interface IGuild extends Document {
 		postCount: number;
 	};
 	warnings: Map<string, number>;
+	tags: IServerTag[];
 }
+
+const serverTagSchema = new Schema<IServerTag>({
+	name: { type: String, required: true, maxlength: 50 },
+	content: { type: String, required: true, maxlength: 2000 },
+	userId: { type: String, required: true },
+	createdAt: { type: Date, default: Date.now },
+});
 
 const guildSchema = new Schema<IGuild>({
 	guildId: { type: String, required: true, unique: true },
@@ -26,6 +41,7 @@ const guildSchema = new Schema<IGuild>({
 		of: Number,
 		default: new Map<string, number>(),
 	},
+	tags: { type: [serverTagSchema], default: [] },
 });
 
 export const Guild = model<IGuild>("Guild", guildSchema);
