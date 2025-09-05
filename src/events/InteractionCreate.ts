@@ -89,6 +89,21 @@ const interactionCreateEvent: BotEventHandler<Events.InteractionCreate> = {
 				await modal.execute(interaction);
 				return;
 			}
+
+			if (interaction.isAutocomplete()) {
+				const command = interaction.client.commands?.get(interaction.commandName);
+				if (!command || !command.autocomplete) {
+					log("warning", `No autocomplete handler found for: ${interaction.commandName}`);
+					return;
+				}
+
+				try {
+					await command.autocomplete(interaction);
+				} catch (error) {
+					log("error", `Failed executing autocomplete for ${interaction.commandName}:`, error);
+				}
+				return;
+			}
 		} catch (error) {
 			log("error", `Failed executing interaction:`, error);
 			if (interaction.isRepliable() && !interaction.replied) {
