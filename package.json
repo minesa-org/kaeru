@@ -1,0 +1,41 @@
+{
+	"name": "kaeru",
+	"version": "1.2.0",
+	"description": "A modular Discord bot with AI, moderation, and ticketing capabilities.",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"clean": "rm -rf ./dist",
+		"build": "npm run clean && tsc --project tsconfig.json",
+		"start": "node dist/index.js",
+		"dev": "npm run build && npm run start"
+	},
+	"keywords": [
+		"discord",
+		"discordjs",
+		"bot",
+		"moderation",
+		"tickets",
+		"ai",
+		"kaeru"
+	],
+	"author": "Neodevils",
+	"license": "MIT",
+	"dependencies": {
+		"@google/generative-ai": "^0.24.1",
+		"chalk": "^5.4.1",
+		"discord.js": "^14.21.0",
+		"dotenv": "^17.2.1",
+		"moment-timezone": "^0.6.0",
+		"mongoose": "^8.17.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.2.1",
+		"prettier": "^3.6.2",
+		"tsx": "^4.20.3",
+		"typescript": "^5.4.5"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}
