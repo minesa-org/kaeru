@@ -89,32 +89,53 @@ class TagManager {
 	}
 
 	async deleteTag(
-		name: string,
-		userId: string,
-		serverId?: string,
-	): Promise<{ success: boolean; message: string }> {
-		const userResult = await User.updateOne(
-			{ userId },
-			{ $pull: { tags: { name: { $regex: new RegExp(`^${name}$`, "i") } } } },
-		);
+  name: string,
+  userId: string,
+  serverId?: string,
+): Promise<{ success: boolean; message: string }> {
+  if (!serverId) {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return { success: false, message: "No tags found for this user" };
+    }
 
-		if (userResult.modifiedCount > 0) {
-			return { success: true, message: `User tag "${name}" deleted` };
-		}
+    const beforeCount = user.tags.length;
+    user.tags = user.tags.filter(
+      (tag) => tag.name.toLowerCase() !== name.toLowerCase(),
+    );
 
-		if (serverId) {
-			const serverResult = await Guild.updateOne(
-				{ guildId: serverId },
-				{ $pull: { tags: { name: { $regex: new RegExp(`^${name}$`, "i") }, userId } } },
-			);
+    if (user.tags.length === beforeCount) {
+      return { success: false, message: "Tag not found" };
+    }
 
-			if (serverResult.modifiedCount > 0) {
-				return { success: true, message: `Server tag "${name}" deleted` };
-			}
-		}
+    await user.save();
+    return { success: true, message: `User tag "${name}" deleted` };
+  }
 
-		return { success: false, message: "Tag not found or no permission to delete" };
-	}
+  const guild = await Guild.findOne({ guildId: serverId });
+  if (!guild) {
+    return { success: false, message: "No tags found for this server" };
+  }
+
+  const beforeCount = guild.tags.length;
+  guild.tags = guild.tags.filter(
+    (tag) =>
+      !(
+        tag.name.toLowerCase() === name.toLowerCase() &&
+        tag.userId === userId
+      ),
+  );
+
+  if (guild.tags.length === beforeCount) {
+    return {
+      success: false,
+      message: "Tag not found or no permission to delete",
+    };
+  }
+
+  await guild.save();
+  return { success: true, message: `Server tag "${name}" deleted` };
+}
 }
 
 export const tagManager = new TagManager();
