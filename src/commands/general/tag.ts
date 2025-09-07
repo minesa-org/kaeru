@@ -227,7 +227,7 @@ const tag: BotCommand = {
 
 		switch (subcommand) {
 			case "create": {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+				await interaction.deferReply();
 
 				const name = interaction.options.getString("name", true);
 				const content = interaction.options.getString("content", true);
@@ -272,6 +272,12 @@ const tag: BotCommand = {
 						content: "I couldn't find that tag.",
 						type: "error",
 						tag: "Tag Not Found",
+					});
+				}
+
+				if (!result.isServer) {
+					return interaction.editReply({
+						content: result.tag.content,
 					});
 				}
 

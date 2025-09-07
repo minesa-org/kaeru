@@ -1,6 +1,6 @@
 {
 	"name": "kaeru",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"description": "A modular Discord bot with AI, moderation, and ticketing capabilities.",
 	"type": "module",
 	"main": "dist/index.js",
