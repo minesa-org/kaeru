@@ -198,6 +198,6 @@ Reply with ONLY the category name.
 		await chatThread.save();
 	} catch (error: any) {
 		log("error", `Error: ${error}`);
-		await message.reply(`Something went wrong: ${error.message}`);
+		await message.reply(`Ughhh, I can't`);
 	}
 }
