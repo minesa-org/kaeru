@@ -5,9 +5,7 @@ import {
 	InteractionContextType,
 	MessageFlags,
 	PermissionFlagsBits,
-	SeparatorBuilder,
 	SlashCommandBuilder,
-	TextDisplayBuilder,
 } from "discord.js";
 import { BotCommand } from "../../interfaces/botTypes.js";
 import { tagManager } from "../../utils/tagClass.js";
@@ -153,6 +151,28 @@ const tag: BotCommand = {
 						})
 						.setRequired(true)
 						.setAutocomplete(true),
+				)
+				.addUserOption(opt =>
+					opt
+						.setName("user")
+						.setDescription("Send the tag to member to mention them. (Server tags only)")
+						.setNameLocalizations({
+							it: "utente",
+							tr: "kullanıcı",
+							ro: "utilizator",
+							el: "χρήστης",
+							"pt-BR": "usuário",
+							"zh-CN": "用户",
+						})
+						.setDescriptionLocalizations({
+							it: "Manda il tag al membro per menzionarlo. (Solo tag del server)",
+							tr: "Etiketi üyeye gönderin ve bahsedin. (Sadece sunucu etiketleri)",
+							ro: "Trimite eticheta membrului pentru a-l menționa. (Etichete de server doar)",
+							el: "Στείλτε την ετικέτα στο μέλος για να το αναφέρετε. (Μόνο ετικέτες διακομιστή)",
+							"pt-BR": "Envie a tag para o membro para mencioná-lo. (Apenas tags de servidor)",
+							"zh-CN": "将标签发送给成员以提及他们。 (仅限服务器标签)",
+						})
+						.setRequired(false),
 				),
 		)
 		.addSubcommand(sub =>
@@ -264,6 +284,7 @@ const tag: BotCommand = {
 				await interaction.deferReply();
 
 				const name = interaction.options.getString("name", true);
+				const toUser = interaction.options.getUser("user", false);
 				const result = await tagManager.getTag(name, userId, serverId);
 
 				if (!result) {
@@ -283,9 +304,13 @@ const tag: BotCommand = {
 
 				return interaction.editReply({
 					components: [
-						new TextDisplayBuilder().setContent(`### ${getEmoji("tag")} ${result.tag.name}`),
-						new SeparatorBuilder().setDivider(true),
-						new TextDisplayBuilder().setContent(result.tag.content),
+						containerTemplate({
+							tag: "Tag Used",
+							description: toUser
+								? `${result.tag.content}\n\n-# <@${toUser.id}>`
+								: result.tag.content,
+							title: `${getEmoji("tag")} ${result.tag.name}`,
+						}),
 					],
 					flags: MessageFlags.IsComponentsV2,
 				});
