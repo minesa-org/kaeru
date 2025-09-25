@@ -38,7 +38,31 @@ const timelapse: BotCommand = {
 			it: "Vedi il riepilogo del canale usando l'IA",
 			"zh-CN": "使用AI查看频道摘要",
 			"pt-BR": "Veja o resumo do canal usando IA",
-		}),
+		})
+		.addBooleanOption(option =>
+			option
+				.setName("ephemeral")
+				.setNameLocalizations({
+					tr: "geçici",
+					ru: "эпфемерал",
+					de: "ephemeral",
+					it: "episodico",
+					"zh-CN": "短暂",
+					"pt-BR": "efêmero",
+				})
+				.setDescription("Make the message ephemeral")
+				.setDescriptionLocalizations({
+					tr: "Mesajı geçici yap",
+					ru: "Сделать сообщение эфемеральным",
+					de: "Mach die Nachricht ephemeral",
+					it: "Rendi il messaggio episodico",
+					"zh-CN": "使消息短暂",
+					"pt-BR": "Tornar a mensagem efêmera",
+					ro: "Faceți mesajul efemeră",
+					el: "Κάντε το μήνυμα εφημερικό",
+				})
+				.setRequired(false),
+		) as SlashCommandBuilder,
 
 	execute: async (interaction: ChatInputCommandInteraction) => {
 		const { channel } = interaction;
@@ -62,7 +86,9 @@ const timelapse: BotCommand = {
 			});
 		}
 
-		await interaction.deferReply();
+		const ephemeral = interaction.options.getBoolean("ephemeral") || false;
+
+		await interaction.deferReply({ flags: ephemeral ? MessageFlags.Ephemeral : [] });
 
 		try {
 			const messages = await channel.messages.fetch({ limit: 30 });
@@ -87,8 +113,7 @@ ${content}
 				const completion = await karus.chat.completions.create({
 					model: "x-ai/grok-4-fast:free",
 					temperature: 0.2,
-					top_p: 1,
-					messages: [{ role: "system", content: fullPrompt }],
+					messages: [{ role: "user", content: fullPrompt }],
 				});
 
 				const output = completion.choices[0]?.message?.content?.trim() || "";

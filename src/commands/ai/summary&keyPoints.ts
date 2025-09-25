@@ -106,7 +106,7 @@ Key Points:
 				const completion = await karus.chat.completions.create({
 					model: "x-ai/grok-4-fast:free",
 					temperature: 0.3,
-					messages: [{ role: "system", content: prompt }],
+					messages: [{ role: "user", content: prompt }],
 				});
 
 				const output = completion.choices[0]?.message?.content?.trim() || "";

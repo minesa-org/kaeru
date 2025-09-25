@@ -84,7 +84,7 @@ ${messageTexts}
 			model: "x-ai/grok-4-fast:free",
 			temperature: 0.3,
 			top_p: 1,
-			messages: [{ role: "system", content: systemPrompt }],
+			messages: [{ role: "user", content: systemPrompt }],
 		});
 
 		const output = completion.choices[0]?.message?.content?.trim() || "";
