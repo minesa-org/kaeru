@@ -1,9 +1,6 @@
 import {
 	ActionRowBuilder,
 	ApplicationIntegrationType,
-	AutoModerationActionType,
-	AutoModerationRuleEventType,
-	AutoModerationRuleTriggerType,
 	bold,
 	ChannelType,
 	ChatInputCommandInteraction,
@@ -35,7 +32,7 @@ import {
 	setImageChannel,
 	containerTemplate,
 } from "../../utils/export.js";
-import { karu } from "../../config/karu.js";
+import { karus } from "../../config/karu.js";
 
 const setup: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -302,58 +299,6 @@ const setup: BotCommand = {
 						.addChannelTypes(ChannelType.GuildVoice)
 						.setRequired(true),
 				),
-		)
-		// Automod Ruleset
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName("automod-rule-set")
-				.setNameLocalizations({
-					it: "set-regole-automod",
-					tr: "otomatik-mod-kuralları",
-					"zh-CN": "自动模式规则集",
-					"pt-BR": "conjunto-de-regras-automod",
-					ro: "set-reguli-automod",
-					el: "ορισμός-αυτόματου-κανονισμού",
-					de: "automod-regelmenge",
-					ru: "настройки-автомода",
-				})
-				.setDescription("Set up automod ruleset for the server!")
-				.setDescriptionLocalizations({
-					it: "Configura il set di regole automod per il server!",
-					tr: "Sunucu için otomatik mod kurallarını ayarla!",
-					"zh-CN": "为服务器设置自动管理模式！",
-					"pt-BR": "Configure o conjunto de regras automod para o servidor!",
-					ro: "Configură setul de reguli automod pentru server!",
-					el: "Ορίστε τον ορισμό αυτόματου κανονισμού για τον διακομιστή!",
-					de: "Richte das Automod-Regelmenge für den Server ein!",
-					ru: "Настрой автоматическую систему правил для сервера!",
-				})
-				.addAttachmentOption(option =>
-					option
-						.setName("rule-file")
-						.setNameLocalizations({
-							it: "file-regola",
-							tr: "kural-dosyası",
-							"zh-CN": "规则文件",
-							"pt-BR": "arquivo-de-regra",
-							ro: "fișier-regulă",
-							el: "αρχείο-κανονισμού",
-							de: "regel-datei",
-							ru: "файл-правил",
-						})
-						.setDescription("Upload your automod rule file")
-						.setDescriptionLocalizations({
-							it: "Carica il tuo file di regole automod",
-							tr: "Otomatik mod kural dosyanızı yükleyin",
-							"zh-CN": "上传您的自动模式规则文件",
-							"pt-BR": "Envie seu arquivo de regras automod",
-							ro: "Trimiteți fișierul de reguli automod",
-							el: "Ανεβάστε το αρχείο κανονισμού automod",
-							de: "Laden Sie Ihre Automod-Regel-Datei hoch",
-							ru: "Загрузите файл правил автомода",
-						})
-						.setRequired(true),
-				),
 		) as SlashCommandBuilder,
 
 	execute: async (interaction: ChatInputCommandInteraction) => {
@@ -580,182 +525,6 @@ const setup: BotCommand = {
 			});
 		};
 
-		const automodRulesetCommand = async () => {
-			if (!guild?.members.me?.permissions.has("ManageGuild")) {
-				return sendAlertMessage({
-					interaction,
-					content: `It seems like I can't create automod ruleset for the server.\n> ${getEmoji("reactions.user.thumbsup")} Got it! I will give you the permission to manage, soon.`,
-					type: "error",
-					tag: "Missing Permissions",
-					alertReaction: "reactions.kaeru.emphasize",
-				});
-			}
-
-			await interaction.deferReply();
-
-			const RULE_NAME = "Server Rules - Automod";
-
-			const file = interaction.options.getAttachment("rule-file", true);
-
-			if (!file.name.endsWith(".txt") && !file.name.endsWith(".md")) {
-				return sendAlertMessage({
-					interaction,
-					content: `Please upload a .txt or .md file.`,
-					type: "error",
-					tag: "Invalid File",
-				});
-			}
-
-			const response = await fetch(file.url);
-			const ruleText = await response.text();
-
-			if (!ruleText.trim()) {
-				return sendAlertMessage({
-					interaction,
-					content: `The file is empty.`,
-					type: "error",
-					tag: "Empty File",
-				});
-			}
-
-			const systemPrompt = `
-You are an assistant that creates Discord AutoMod keyword rules from server rules text. 
-Extract ONLY offensive slurs, abusive insults, and explicit sexual words that violate community standards.
-Do NOT include neutral or descriptive words (e.g. "harassment", "disabled", "violence", "graphic", "disturbing").
-Output ONLY a valid JSON array of harmful keywords (no explanations, no code blocks, no text outside the array).
-Include all important slurs, even ones commonly censored by AI.
-Example: ["nigga", "n!gga", "rape", "sex", "faggot", "retard", "cunt", "slut", "whore", "pedo", "pedophile", "groomer", "dyke", "tranny", "fuck", "bitch"]
-  
-Here are the server rules:
-${ruleText}
-  `;
-
-			let keywords: string[] = [];
-			const fallbackKeywords = ["nigga", "n!gga", "rape", "sex", "faggot", "retard", "cunt"];
-			const criticalFallback = [
-				"nigga",
-				"n!gga",
-				"faggot",
-				"rape",
-				"pedophile",
-				"pedo",
-				"slut",
-				"whore",
-			];
-
-			let rawOutput = "";
-
-			try {
-				const aiResponse = karu.getGenerativeModel({
-					model: "gemma-3n-e4b-it",
-					generationConfig: {
-						temperature: 0.2,
-						maxOutputTokens: 800,
-						topK: 1,
-						topP: 1,
-					},
-				});
-
-				const result = await aiResponse.generateContent(systemPrompt);
-				rawOutput = result.response.text().trim();
-
-				let cleaned = rawOutput
-					.replace(/```(?:json)?/gi, "")
-					.replace(/```/g, "")
-					.trim();
-
-				keywords = JSON.parse(cleaned);
-
-				if (!Array.isArray(keywords)) throw new Error("AI output is not an array");
-			} catch (error) {
-				console.error("Error generating automod rules:", error);
-				keywords = fallbackKeywords;
-			}
-
-			const bannedGenerics = [
-				"harassment",
-				"bullying",
-				"violence",
-				"graphic",
-				"disturbing",
-				"offensive",
-				"disabled",
-				"toxic",
-				"unwelcoming",
-				"hate",
-				"hate speech",
-				"discrimination",
-				"prejudice",
-				"racism",
-				"sexism",
-				"misogyny",
-				"bigot",
-			];
-
-			keywords = keywords
-				.filter(
-					w =>
-						typeof w === "string" &&
-						w.length > 2 &&
-						!bannedGenerics.includes(w.toLowerCase()) &&
-						!w.includes(" "),
-				)
-				.concat(criticalFallback);
-
-			keywords = Array.from(new Set(keywords));
-
-			if (!keywords.length) {
-				return sendAlertMessage({
-					interaction,
-					content: `No usable keywords were generated.`,
-					type: "error",
-					tag: "No Keywords",
-				});
-			}
-
-			let rules = await guild.autoModerationRules.fetch();
-			let rule = rules.find(r => r.name === RULE_NAME);
-
-			if (!rule) {
-				rule = await guild.autoModerationRules.create({
-					name: RULE_NAME,
-					eventType: AutoModerationRuleEventType.MessageSend,
-					triggerType: AutoModerationRuleTriggerType.Keyword,
-					triggerMetadata: {
-						keywordFilter: keywords.slice(0, 1000),
-					},
-					actions: [
-						{
-							type: AutoModerationActionType.BlockMessage,
-							metadata: {
-								customMessage: "Please read the server rules before posting.",
-							},
-						},
-					],
-					enabled: true,
-					reason: "Initialized by automod ruleset system",
-				});
-			}
-
-			return interaction.editReply({
-				components: [
-					containerTemplate({
-						tag: "Automod Ruleset Created",
-						title: `${getEmoji("reactions.kaeru.emphasize")} Automod ruleset created successfully!`,
-						description: [
-							`- ${keywords.length} strong keywords were generated.`,
-							`- Neutral/common terms were filtered out.`,
-							`- Critical slurs were added from fallback.`,
-							`- The ruleset is now active.`,
-							``,
-							`**Filtered Keywords Applied:**\n\`\`\`json\n${JSON.stringify(keywords, null, 2)}\n\`\`\``,
-						].join("\n"),
-					}),
-				],
-				flags: [MessageFlags.IsComponentsV2],
-			});
-		};
-
 		switch (interaction.options.getSubcommand()) {
 			case "ticket":
 				await ticketCommand();
@@ -765,9 +534,6 @@ ${ruleText}
 				break;
 			case "image-channel":
 				await imageChannel();
-				break;
-			case "automod-rule-set":
-				await automodRulesetCommand();
 				break;
 		}
 	},

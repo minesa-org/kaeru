@@ -1,16 +1,7 @@
-import { karu } from "../config/karu.js";
+import { karus } from "../config/karu.js";
+
 export async function summarizeTicketTitle(inputText: string) {
 	try {
-		const model = karu.getGenerativeModel({
-			model: "gemma-3n-e4b-it",
-			generationConfig: {
-				temperature: 0.2,
-				maxOutputTokens: 60,
-				topP: 1,
-				topK: 1,
-			},
-		});
-
 		const prompt = `
 You are an AI assistant that summarizes user-submitted Discord support requests into short, clean, and professional titles.
 
@@ -31,11 +22,14 @@ Now summarize this:
 ${inputText}
 `.trim();
 
-		const result = await model.generateContent(prompt);
-		const raw = result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
-		if (!raw) {
-			return null;
-		}
+		const completion = await karus.chat.completions.create({
+			model: "x-ai/grok-4-fast:free",
+			temperature: 0.2,
+			messages: [{ role: "user", content: prompt }],
+		});
+
+		const raw = completion.choices[0]?.message?.content?.trim();
+		if (!raw) return null;
 
 		const clean = raw
 			.replace(/[*_`~]/g, "")

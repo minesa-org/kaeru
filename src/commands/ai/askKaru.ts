@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from "discord.js";
 import type { BotCommand } from "../../interfaces/botTypes.js";
-import { karu } from "../../config/karu.js";
+import { karus } from "../../config/karu.js";
 import { containerTemplate, getEmoji, langMap, log, sendAlertMessage } from "../../utils/export.js";
 
 const askKaru: BotCommand = {
@@ -101,23 +101,18 @@ Do not mention or reveal anything about your underlying technology, model name, 
 
 Never collect, store, or request personal or sensitive information.
 
-Always assume the user wants high-signal help — no fluff.
-			`.trim();
+Always assume the user wants high-signal help — no fluff. You give newest and most relevant information only. We are in 2025.
+`.trim();
 
-			const fullPrompt = `${systemPrompt}\nUser: ${prompt}`;
-
-			const model = karu.getGenerativeModel({
-				model: "gemma-3n-e4b-it",
-				generationConfig: {
-					temperature: 0.2,
-					maxOutputTokens: 800,
-					topK: 1,
-					topP: 1,
-				},
+			const completion = await karus.chat.completions.create({
+				model: "x-ai/grok-4-fast:free",
+				messages: [
+					{ role: "system", content: systemPrompt },
+					{ role: "user", content: prompt },
+				],
 			});
 
-			const result = await model.generateContent(fullPrompt);
-			let output = result.response.text().trim();
+			let output = completion.choices[0]?.message?.content?.trim() || "";
 
 			output = output
 				.replace(/^Kaeru[:,\s]*/i, "")

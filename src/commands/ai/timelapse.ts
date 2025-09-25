@@ -8,8 +8,14 @@ import {
 	ThreadChannel,
 } from "discord.js";
 import { BotCommand } from "../../interfaces/botTypes.js";
-import { karu } from "../../config/karu.js";
-import { getEmoji, useCooldown, sendAlertMessage, containerTemplate } from "../../utils/export.js";
+import { karus } from "../../config/karu.js";
+import {
+	getEmoji,
+	useCooldown,
+	sendAlertMessage,
+	containerTemplate,
+	log,
+} from "../../utils/export.js";
 
 const timelapse: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -58,17 +64,18 @@ const timelapse: BotCommand = {
 
 		await interaction.deferReply();
 
-		const messages = await channel.messages.fetch({ limit: 30 });
-		const sortedMessages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+		try {
+			const messages = await channel.messages.fetch({ limit: 30 });
+			const sortedMessages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
 
-		const content = sortedMessages
-			.map(msg => {
-				const name = msg.member?.displayName || msg.author.username;
-				return `${name}: ${msg.content}`;
-			})
-			.join("\n");
+			const content = sortedMessages
+				.map(msg => {
+					const name = msg.member?.displayName || msg.author.username;
+					return `${name}: ${msg.content}`;
+				})
+				.join("\n");
 
-		const fullPrompt = `
+			const fullPrompt = `
 You are an AI assistant. Summarize the following Discord messages in a short, continuous text. 
 Do not create lists, bullet points, or key points. Just condense the messages into a brief readable text.
 
@@ -76,32 +83,50 @@ Messages:
 ${content}
 `;
 
-		const model = karu.getGenerativeModel({
-			model: "gemma-3n-e4b-it",
-			generationConfig: {
-				temperature: 0.2,
-				maxOutputTokens: 800,
-				topK: 1,
-				topP: 1,
-			},
-		});
+			try {
+				const completion = await karus.chat.completions.create({
+					model: "x-ai/grok-4-fast:free",
+					temperature: 0.2,
+					top_p: 1,
+					messages: [{ role: "system", content: fullPrompt }],
+				});
 
-		const result = await model.generateContent(fullPrompt);
-		const output = result.response.text().trim();
+				const output = completion.choices[0]?.message?.content?.trim() || "";
 
-		messages.clear();
+				messages.clear();
 
-		return interaction.editReply({
-			components: [
-				containerTemplate({
-					tag: `${getEmoji("magic")} Kāru Timelapse Summary`,
-					description: `>>> ${output}`,
-					thumbnail:
-						"https://media.discordapp.net/attachments/736571695170584576/1408561935041036298/Normal.png?ex=68aa3107&is=68a8df87&hm=dc29cb372f6f3f9429943429ac9db5d24772d4d2c54a7d40ddb9a6c1b9d6fc26&=&format=webp&quality=lossless&width=1410&height=1410",
-				}),
-			],
-			flags: MessageFlags.IsComponentsV2,
-		});
+				return interaction.editReply({
+					components: [
+						containerTemplate({
+							tag: `${getEmoji("magic")} Kāru Timelapse Summary`,
+							description: `>>> ${output}`,
+							thumbnail:
+								"https://media.discordapp.net/attachments/736571695170584576/1408561935041036298/Normal.png?ex=68aa3107&is=68a8df87&hm=dc29cb372f6f3f9429943429ac9db5d24772d4d2c54a7d40ddb9a6c1b9d6fc26&=&format=webp&quality=lossless&width=1410&height=1410",
+						}),
+					],
+					flags: MessageFlags.IsComponentsV2,
+				});
+			} catch (err) {
+				log("error", "Failed to summarize the channel:", err);
+
+				return sendAlertMessage({
+					interaction,
+					content:
+						"Failed to summarize Karu. The system might be confused — try again in a moment.",
+					type: "error",
+					tag: "AI Issue",
+				});
+			}
+		} catch (err) {
+			log("error", "Failed to summarize the channel:", err);
+
+			return sendAlertMessage({
+				interaction,
+				content: "Failed to summarize Karu. The system might be confused — try again in a moment.",
+				type: "error",
+				tag: "AI Issue",
+			});
+		}
 	},
 };
 
