@@ -1,3 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const karu = new GoogleGenerativeAI(process.env.KARU_API_KEY!);
+import OpenAI from "openai";
+
+export const karus = new OpenAI({
+	baseURL: "https://openrouter.ai/api/v1",
+	apiKey: process.env.OPENROUTER_API_KEY,
+});
+

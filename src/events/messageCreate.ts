@@ -1,7 +1,7 @@
 import { Events, Message, TextChannel, ThreadChannel } from "discord.js";
 import MessageModel from "../models/message.model.js";
 import { EventModule } from "../interfaces/botTypes.js";
-import { karu } from "../config/karu.js";
+import { karus } from "../config/karu.js";
 import { getMongooseConnection } from "../database/mongoose.js";
 import {
 	log,
@@ -111,25 +111,23 @@ const messageCreateEvent: EventModule<Events.MessageCreate> = {
 		if (message.channel instanceof TextChannel) {
 			if (!message.mentions.has(message.client.user)) return;
 
-			const summaryModel = karu.getGenerativeModel({
-				model: "gemma-3n-e4b-it",
-				generationConfig: {
-					temperature: 0.2,
-					maxOutputTokens: 32,
-				},
-			});
+			const summaryPrompt = `You are a concise AI. Summarize the following message in under 5 words as a thread title:
 
-			const summaryPrompt = `Summarize the following user message in under 5 words for use as a thread title:\n"${userPrompt}"`;
+"${userPrompt}"`;
 
 			try {
-				const summaryResult = await summaryModel.generateContent(summaryPrompt);
-				let threadName = summaryResult.response
-					.text()
+				const summaryResult = await karus.chat.completions.create({
+					model: "x-ai/grok-4-fast:free",
+					temperature: 0.2,
+					messages: [{ role: "user", content: summaryPrompt }],
+				});
+
+				let threadName = summaryResult.choices[0]?.message?.content
 					?.replace(/[*_~`>#\n\r]/g, "")
 					.trim()
 					.slice(0, 80);
 
-				if (!threadName) threadName = `💭 Käru & ${message.author.username}`;
+				if (!threadName) threadName = `Kāru & ${message.author.username}`;
 
 				const thread = await message.startThread({
 					name: `💭 ${threadName}`,
