@@ -22,15 +22,22 @@ const client = new Client({
 	partials: [Partials.GuildMember, Partials.Message, Partials.Channel],
 	presence: {
 		status: PresenceUpdateStatus.Idle,
-		activities: [
-			{
-				name: "Pro & A.I. features for free",
-				type: ActivityType.Watching,
-				state: "Serving free pro features for your community.",
-			},
-		],
+		// activities: [
+		// 	{
+		// 		name: "Unparallelled",
+		// 		type: ActivityType.Custom,
+		// 	},
+		// ],
 	},
 });
+
+setInterval(() => {
+	const randomActivity = ["Unparallelled", "Free premium features"];
+	const randomIndex = Math.floor(Math.random() * randomActivity.length);
+	const randomName = randomActivity[randomIndex];
+
+	client.user?.setActivity(randomName, { type: ActivityType.Custom });
+}, 60000);
 
 printLogo();
 
