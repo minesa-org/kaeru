@@ -354,7 +354,7 @@ const setup: BotCommand = {
 			const staffRole = interaction.options.getRole("staff_role")?.id ?? "";
 
 			let imageUrl =
-				"https://cdn.discordapp.com/attachments/736571695170584576/1398695161923375144/default_ticket_image.png?ex=68864be1&is=6884fa61&hm=0e8b5986b4ee4a9451a844bf1e6b1eecb3abd4d125f5c5670ece213d82d2ee36&"; // kaeru's default image for ticket banner
+				"https://cdn.discordapp.com/attachments/736571695170584576/1422748982047932438/Default_Card.png?ex=68ddcdbe&is=68dc7c3e&hm=b16c3ef319ec1633a6798954492a4f3d58114422af50d1e0be9511a459e8ee4f&"; // kaeru's default image for ticket banner
 
 			if (customImageUrl) {
 				if (isValidImageUrl(customImageUrl)) {
