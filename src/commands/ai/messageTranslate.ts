@@ -82,7 +82,7 @@ Do NOT add anything else.
 `.trim();
 
 			const completion = await karus.chat.completions.create({
-				model: "x-ai/grok-4-fast:free",
+				model: "deepseek/deepseek-chat-v3.1:free",
 				temperature: 0.3,
 				top_p: 1,
 				messages: [

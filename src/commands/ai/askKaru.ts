@@ -105,7 +105,7 @@ Always assume the user wants high-signal help — no fluff. You give newest and 
 `.trim();
 
 			const completion = await karus.chat.completions.create({
-				model: "x-ai/grok-4-fast:free",
+				model: "deepseek/deepseek-chat-v3.1:free",
 				messages: [
 					{ role: "system", content: systemPrompt },
 					{ role: "user", content: prompt },

@@ -111,7 +111,7 @@ ${content}
 
 			try {
 				const completion = await karus.chat.completions.create({
-					model: "x-ai/grok-4-fast:free",
+					model: "deepseek/deepseek-chat-v3.1:free",
 					temperature: 0.2,
 					messages: [{ role: "user", content: fullPrompt }],
 				});
