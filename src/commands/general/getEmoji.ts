@@ -1,4 +1,9 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import {
+	SlashCommandBuilder,
+	ChatInputCommandInteraction,
+	ApplicationIntegrationType,
+	InteractionContextType,
+} from "discord.js";
 import type { BotCommand } from "../../interfaces/botTypes.js";
 import { containerTemplate, EmojiSize, getEmojiURL, sendAlertMessage } from "../../utils/export.js";
 
@@ -6,6 +11,15 @@ const emojiURL: BotCommand = {
 	data: new SlashCommandBuilder()
 		.setName("emoji-url")
 		.setDescription("Get emoji URL.")
+		.setIntegrationTypes([
+			ApplicationIntegrationType.UserInstall,
+			ApplicationIntegrationType.GuildInstall,
+		])
+		.setContexts([
+			InteractionContextType.BotDM,
+			InteractionContextType.PrivateChannel,
+			InteractionContextType.Guild,
+		])
 		.addStringOption(option =>
 			option.setName("emoji").setDescription("Emoji to get URL for").setRequired(true),
 		)
