@@ -20,7 +20,6 @@ import {
 	containerTemplate,
 } from "../../utils/export.js";
 import { BotCommand } from "../../interfaces/botTypes.js";
-import { getImageBase64 } from "../../utils/getImageBase64.js";
 
 const createGiveaway: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -307,7 +306,7 @@ const createGiveaway: BotCommand = {
 
 		const scheduledStartTime = moment().tz(timezone).add(seconds, "seconds");
 		const scheduledEndTime = moment(scheduledStartTime).add(1, "hours");
-		const fallbackImage = getImageBase64("https://raw.githubusercontent.com/minesa-org/kaeru/refs/heads/main/src/assets/Giveaway_Default.png");
+		const fallbackImage = "https://raw.githubusercontent.com/minesa-org/kaeru/refs/heads/main/src/assets/Giveaway_Default.png";
 
 		const imageData = giveawayImage?.url ?? fallbackImage;
 
