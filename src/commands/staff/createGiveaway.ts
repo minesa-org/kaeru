@@ -20,6 +20,7 @@ import {
 	containerTemplate,
 } from "../../utils/export.js";
 import { BotCommand } from "../../interfaces/botTypes.js";
+import { getImageBase64 } from "../../utils/getImageBase64.js";
 
 const createGiveaway: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -306,13 +307,14 @@ const createGiveaway: BotCommand = {
 
 		const scheduledStartTime = moment().tz(timezone).add(seconds, "seconds");
 		const scheduledEndTime = moment(scheduledStartTime).add(1, "hours");
+		const fallbackImage = getImageBase64("src/assets/Giveaway_Default.png");
+
+		const imageData = giveawayImage?.url ?? fallbackImage;
 
 		const giveaway = await interaction.guild.scheduledEvents.create({
 			name: giveawayName,
 			description: giveawayDescription,
-			image:
-				giveawayImage?.url ??
-				"https://cdn.discordapp.com/attachments/736571695170584576/1422748982622289950/Giveaway_Default.png?ex=68ddcdbe&is=68dc7c3e&hm=d5dac383cabc6819480d7e783de542f26cf4acfbb7b6447a69b57963f035ad4a&",
+			image: imageData,
 			scheduledStartTime: scheduledStartTime.toDate(),
 			scheduledEndTime: scheduledEndTime.toDate(),
 			privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
