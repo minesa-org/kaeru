@@ -307,7 +307,7 @@ const createGiveaway: BotCommand = {
 
 		const scheduledStartTime = moment().tz(timezone).add(seconds, "seconds");
 		const scheduledEndTime = moment(scheduledStartTime).add(1, "hours");
-		const fallbackImage = getImageBase64("src/assets/Giveaway_Default.png");
+		const fallbackImage = getImageBase64("https://raw.githubusercontent.com/minesa-org/kaeru/refs/heads/main/src/assets/Giveaway_Default.png");
 
 		const imageData = giveawayImage?.url ?? fallbackImage;
 
