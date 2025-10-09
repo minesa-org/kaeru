@@ -26,24 +26,17 @@ interface WebhookData {
 const webhookStorage = new Map<string, WebhookData>();
 
 const createTicketModal: BotComponent = {
-	customId: /^ticket-create-modal\|/,
+	customId: "ticket-create-modal",
 
 	execute: async (interaction: ModalSubmitInteraction): Promise<void> => {
-		const [, rawLabel] = interaction.customId.split("|");
-		const labelKey = rawLabel?.replace("label-", "") || "bug";
-		const label = labelKey.toUpperCase();
-		const emoji =
-			emojis.ticket?.label?.[labelKey as keyof typeof emojis.ticket.label] ||
-			emojis.ticket.label.bug;
-
-		const userMessage = interaction.fields.getTextInputValue("message");
+		const userMessage = interaction.fields.getTextInputValue("ticket-message");
 
 		const summarizedTitle = await summarizeTicketTitle(userMessage);
 		const fallback = userMessage.slice(0, 90).replace(/\n/g, " ").trim();
 		const safeSummary = summarizedTitle
 			? summarizedTitle.slice(0, 90).replace(/\n/g, " ").trim()
 			: null;
-		const finalTitle = `[${label}] ${safeSummary || fallback}`.slice(0, 100);
+		const finalTitle = `${safeSummary || fallback}`.slice(0, 100);
 
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -127,7 +120,7 @@ const createTicketModal: BotComponent = {
 				components: [
 					containerTemplate({
 						tag: "Created Ticket",
-						title: `${emoji.id ? `<:${emoji.name}:${emoji.id}>` : emoji} Created <#${thread.id}>`,
+						title: `${getEmoji("ticket.created")} Created <#${thread.id}>`,
 						description: `Now, you can talk about your issue with our staff members.`,
 					}),
 				],
