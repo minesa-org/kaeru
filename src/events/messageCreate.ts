@@ -1,7 +1,6 @@
 import { Events, Message, TextChannel, ThreadChannel } from "discord.js";
 import MessageModel from "../models/message.model.js";
 import { EventModule } from "../interfaces/botTypes.js";
-import { karus } from "../config/karu.js";
 import { getMongooseConnection } from "../database/mongoose.js";
 import {
 	log,
@@ -111,23 +110,17 @@ const messageCreateEvent: EventModule<Events.MessageCreate> = {
 		if (message.channel instanceof TextChannel) {
 			if (!message.mentions.has(message.client.user)) return;
 
-			const summaryPrompt = `You are a concise AI. Summarize the following message in under 5 words as a thread title:
 
-"${userPrompt}"`;
 
 			try {
-				const summaryResult = await karus.chat.completions.create({
-					model: "deepseek/deepseek-chat-v3.1:free",
-					temperature: 0.2,
-					messages: [{ role: "user", content: summaryPrompt }],
-				});
-
-				let threadName = summaryResult.choices[0]?.message?.content
+				const summaryResult = await summaryModel.generateContent(summaryPrompt);
+				let threadName = summaryResult.response
+					.text()
 					?.replace(/[*_~`>#\n\r]/g, "")
 					.trim()
 					.slice(0, 80);
 
-				if (!threadName) threadName = `Kāru & ${message.author.username}`;
+				if (!threadName) threadName = `💭 Käru & ${message.author.username}`;
 
 				const thread = await message.startThread({
 					name: `💭 ${threadName}`,

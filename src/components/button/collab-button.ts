@@ -3,8 +3,8 @@ import {
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
-	ActionRowBuilder,
 	MessageFlags,
+	LabelBuilder,
 } from "discord.js";
 import { BotComponent } from "../../interfaces/botTypes.js";
 import { sendAlertMessage } from "../../utils/error&containerMessage.js";
@@ -41,17 +41,19 @@ const collabButton: BotComponent = {
 			const modal = new ModalBuilder()
 				.setCustomId(`collab_modal_${collabKey}`)
 				.setTitle(`Edit: ${fileData.name}`)
-				.addComponents(
-					new ActionRowBuilder<TextInputBuilder>().addComponents(
-						new TextInputBuilder()
-							.setCustomId("file_content")
-							.setLabel("File Content")
-							.setStyle(TextInputStyle.Paragraph)
-							.setValue(fileData.text)
-							.setMaxLength(4000)
-							.setRequired(true)
-							.setPlaceholder("Please write down your changes."),
-					),
+				.addLabelComponents(
+					new LabelBuilder()
+						.setLabel("File Content")
+						.setDescription("Please write down your changes.")
+						.setTextInputComponent(
+							new TextInputBuilder()
+								.setCustomId("file_content")
+								.setStyle(TextInputStyle.Paragraph)
+								.setValue(fileData.text)
+								.setMaxLength(4000)
+								.setRequired(true)
+								.setPlaceholder("Changes..."),
+						),
 				);
 
 			return interaction.showModal(modal);

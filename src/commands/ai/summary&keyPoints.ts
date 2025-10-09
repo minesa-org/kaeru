@@ -5,8 +5,10 @@ import {
 	InteractionContextType,
 	MessageFlags,
 	MessageContextMenuCommandInteraction,
+	SeparatorSpacingSize,
+	SeparatorBuilder,
 } from "discord.js";
-import { karus } from "../../config/karu.js";
+import { karu } from "../../config/karu.js";
 import type { BotCommand } from "../../interfaces/botTypes.js";
 import {
 	getEmoji,
@@ -103,13 +105,18 @@ Key Points:
 `.trim();
 
 			try {
-				const completion = await karus.chat.completions.create({
-					model: "x-ai/grok-4-fast:free",
-					temperature: 0.3,
-					messages: [{ role: "user", content: prompt }],
+				const model = karu.getGenerativeModel({
+					model: "gemma-3n-e4b-it",
+					generationConfig: {
+						temperature: 0.3,
+						maxOutputTokens: 1024,
+						topP: 0.9,
+						topK: 10,
+					},
 				});
+				const result = await model.generateContent([prompt]);
 
-				const output = completion.choices[0]?.message?.content?.trim() || "";
+				const output = result.response.text();
 
 				if (!output) {
 					throw new Error("No response text from model");
@@ -131,7 +138,7 @@ Key Points:
 					components: [
 						containerTemplate({
 							tag: "Summary & Key-Points System",
-							description: [summaryTextSection + "\n\n", keyPointsTextSection],
+							description: [summaryTextSection, "", keyPointsTextSection],
 						}),
 					],
 					flags: MessageFlags.IsComponentsV2,

@@ -6,7 +6,7 @@ import {
 	MessageFlags,
 	MessageContextMenuCommandInteraction,
 } from "discord.js";
-import { karus } from "../../config/karu.js";
+import { karu } from "../../config/karu.js";
 import type { BotCommand } from "../../interfaces/botTypes.js";
 import { getEmoji, log, langMap, sendAlertMessage } from "../../utils/export.js";
 
@@ -61,37 +61,39 @@ const messageTranslate: BotCommand = {
 			const intl = new Intl.Locale(fullLocale);
 			const rawLang = intl.language.toLowerCase();
 
-			const targetLang = langMap[fullLocale.toLowerCase()] || langMap[rawLang] || "English";
+			const targetLang = langMap[fullLocale.toLowerCase()] || langMap[rawLang] || "english";
 
-			const systemPrompt = `
-You are a professional translator fluent in both English and the target language (${targetLang}). 
+			const model = karu.getGenerativeModel({
+				model: "gemma-3n-e4b-it",
+				generationConfig: {
+					temperature: 0.3,
+					maxOutputTokens: 1200,
+					topP: 1,
+					topK: 1,
+				},
+			});
 
-Your task is to:
-1. Clean and correct the input message while preserving its meaning, tone, and paragraphs.
-2. Translate the entire message naturally and fluently into ${targetLang}, preserving paragraphs and implied emotions.
+			const prompt = `
+You are a professional translator fluent in both English and the target language (${targetLang}). Your task is to translate the entire input message naturally and accurately into ${targetLang}, preserving full meaning, tone, and implied emotions.
 
-Return exactly two sections, labeled:
+Clean and translate the entire message below:
+
+Message:
+${safeMessage}
+
+Return exactly two sections, labeled as follows:
 
 Cleaned:
-[Corrected and cleaned original message]
+[Corrected and cleaned original message, preserving paragraphs]
 
 Translated:
-[Natural, fluent translation]
+[Natural, fluent translation of the entire message, preserving paragraphs]
 
 Do NOT add anything else.
 `.trim();
 
-			const completion = await karus.chat.completions.create({
-				model: "x-ai/grok-4-fast:free",
-				temperature: 0.3,
-				top_p: 1,
-				messages: [
-					{ role: "system", content: systemPrompt },
-					{ role: "user", content: safeMessage },
-				],
-			});
-
-			const raw = completion.choices[0]?.message?.content?.trim() || "";
+			const result = await model.generateContent(prompt);
+			const raw = result.response.text().trim();
 
 			const cleanedMatch = raw.match(/Cleaned:\s*([\s\S]*?)\nTranslated:/i);
 			const translatedMatch = raw.match(/Translated:\s*([\s\S]*)/i);

@@ -4,13 +4,16 @@ import {
 	ThreadChannel,
 	MessageFlags,
 	SlashCommandBuilder,
+	ContainerBuilder,
+	TextDisplayBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ActionRowBuilder,
+	SeparatorBuilder,
 } from "discord.js";
+import { karu } from "../../config/karu.js";
 import { containerTemplate, getEmoji, sendAlertMessage } from "../../utils/export.js";
 import { BotCommand } from "../../interfaces/botTypes.js";
-import { karus } from "../../config/karu.js";
 
 const moodCheck: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -55,43 +58,40 @@ const moodCheck: BotCommand = {
 
 		await interaction.deferReply();
 
-		const messages = await channel.messages.fetch({ limit: 30 });
+		const messages = await channel.messages.fetch({ limit: 100 });
 		const messageTexts = messages
 			.map(m => m.content)
 			.filter(Boolean)
 			.join("\n");
 
-		const systemPrompt = `
-You are Kāru, an AI that analyzes the collective emotional mood of a Discord channel based only on the messages provided.
-
-Instructions:
-- DO NOT break it down by individual users.
-- Focus solely on the overall mood of the group.
-- Output only three lines, each with a mood label and percentage.
-- The labels must be: Happy, Neutral, Sad.
-- Total must sum to ~100%.
-
-Example output:
-Happy: 65%
-Neutral: 20%
-Sad: 15%
-
-Messages to analyze:
+		const systemPrompt = `You are Kaeru, an AI that analyzes the overall mood of a Discord channel.
+Do NOT break it down by individual users.
+Focus on the collective mood based on the messages provided.
+Provide a concise summary in percentages, like:
+Happy: 70%
+Sad: 30%
+Neutral: 0%
+Only give the percentages and mood labels, no extra text.
+Use the messages below as input:
 ${messageTexts}
 `.trim();
 
-		const completion = await karus.chat.completions.create({
-			model: "x-ai/grok-4-fast:free",
-			temperature: 0.3,
-			top_p: 1,
-			messages: [{ role: "user", content: systemPrompt }],
+		const model = karu.getGenerativeModel({
+			model: "gemma-3n-e4b-it",
+			generationConfig: {
+				temperature: 0.2,
+				maxOutputTokens: 300,
+				topK: 1,
+				topP: 1,
+			},
 		});
 
-		const output = completion.choices[0]?.message?.content?.trim() || "";
+		const result = await model.generateContent(systemPrompt);
+		const output = result.response.text().trim();
 
 		const moodValues: Record<string, string> = {};
-		output.split("\n").forEach(line => {
-			const [mood, value] = line.split(":").map(s => s.trim());
+		output.split("\n").forEach((line: string) => {
+			const [mood, value] = line.split(":").map((s: string) => s.trim());
 			if (mood && value) moodValues[mood] = value;
 		});
 

@@ -48,7 +48,7 @@ const collabSelectMenu: BotComponent = {
 		await interaction.update({
 			components: [
 				containerTemplate({
-					tag: "",
+					tag: "Collaboration Setup",
 					title: getEmoji("reactions.kaeru.heart"),
 					description: `${getEmoji("document")} Collaboration thread created for **${fileData.name}** file!`,
 				}),

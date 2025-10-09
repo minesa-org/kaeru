@@ -17,7 +17,7 @@ import {
 	sendAlertMessage,
 	containerTemplate,
 } from "../../utils/export.js";
-import { karus } from "../../config/karu.js";
+import { karu } from "../../config/karu.js";
 
 const rewrite: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -238,13 +238,18 @@ const rewrite: BotCommand = {
 		}
 
 		try {
-			const completion = await karus.chat.completions.create({
-				model: "x-ai/grok-4-fast:free",
-				temperature: 0.3,
-				messages: [{ role: "user", content: prompt }],
+			const model = karu.getGenerativeModel({
+				model: "gemma-3n-e4b-it",
+				generationConfig: {
+					temperature: 0.3,
+					maxOutputTokens: 2048,
+					topP: 0.9,
+					topK: 10,
+				},
 			});
 
-			const output = completion.choices[0]?.message?.content?.trim() || "";
+			const result = await model.generateContent(prompt);
+			const output = result.response.text().trim();
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
@@ -260,10 +265,7 @@ const rewrite: BotCommand = {
 			await interaction.editReply({
 				components: [
 					row,
-					containerTemplate({
-						tag: `${getEmoji("magic")} Re-writed Text`,
-						description: output,
-					}),
+					containerTemplate({ tag: `${getEmoji("magic")} Re-writed Text`, description: output }),
 				],
 				flags: MessageFlags.IsComponentsV2,
 			});
