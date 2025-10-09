@@ -372,8 +372,7 @@ const setup: BotCommand = {
 								.setPlaceholder("Markdown is supported")
 								.setStyle(TextInputStyle.Paragraph)
 								.setMaxLength(4000)
-								.setMinLength(10)
-								.setRequired(true),
+								.setRequired(false),
 						),
 					new LabelBuilder()
 						.setId(2)

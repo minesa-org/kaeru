@@ -28,7 +28,13 @@ const setupTicketModal: BotComponent = {
 	execute: async (interaction: ModalSubmitInteraction): Promise<void> => {
 		const { guild } = interaction;
 
-		const TICKET_MESSAGE = interaction.fields.getTextInputValue("ticket-setup-description");
+		const TICKET_MESSAGE =
+			interaction.fields.getTextInputValue("ticket-setup-description") ??
+			[
+				`# ${getEmoji("button")} Create a Ticket`,
+				`If you're experiencing an issue with our product or service, please use the "Create ticket" button to report it.`,
+				`-# This includes any server-related tickets you may be encountering in our Discord server.`,
+			].join("\n");
 		const STAFF_ROLE = interaction.fields.getSelectedRoles("ticket-setup-staff-role", true).first();
 		const IMAGE_URL = interaction.fields.getTextInputValue("ticket-setup-image-url");
 		const SEND_TO_CHANNEL = interaction.fields
