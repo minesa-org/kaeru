@@ -81,7 +81,7 @@ ${messageTexts}
 `.trim();
 
 		const completion = await karus.chat.completions.create({
-			model: "deepseek/deepseek-chat-v3.1:free",
+			model: "x-ai/grok-4-fast:free",
 			temperature: 0.3,
 			top_p: 1,
 			messages: [{ role: "user", content: systemPrompt }],
