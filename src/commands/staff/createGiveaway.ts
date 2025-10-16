@@ -295,7 +295,7 @@ const createGiveaway: BotCommand = {
 		const giveawayName = interaction.options.getString("prize", true);
 		const giveawayDescription =
 			interaction.options.getString("description") ||
-			"Feel free to join <:ita_happy:1170847735008739408>";
+			"Feel free to join";
 		const giveawayImage = interaction.options.getAttachment("image");
 		const duration = interaction.options.getString("duration", true);
 
