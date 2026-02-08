@@ -3,9 +3,12 @@ import {
 	ChatInputCommandInteraction,
 	ApplicationIntegrationType,
 	InteractionContextType,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 } from "discord.js";
 import type { BotCommand } from "../../interfaces/botTypes.js";
-import { containerTemplate, EmojiSize, getEmojiURL, sendAlertMessage } from "../../utils/export.js";
+import { EmojiSize, getEmojiURL, sendAlertMessage } from "../../utils/export.js";
 
 const emojiURL: BotCommand = {
 	data: new SlashCommandBuilder()
@@ -21,7 +24,10 @@ const emojiURL: BotCommand = {
 			InteractionContextType.Guild,
 		])
 		.addStringOption(option =>
-			option.setName("emoji").setDescription("Emoji to get URL for").setRequired(true),
+			option
+				.setName("emoji")
+				.setDescription("Emoji to get URL for")
+				.setRequired(true),
 		)
 		.addIntegerOption(option =>
 			option
@@ -38,32 +44,35 @@ const emojiURL: BotCommand = {
 
 	execute: async (interaction: ChatInputCommandInteraction) => {
 		const emoji = interaction.options.getString("emoji");
-		const size = interaction.options.getInteger("size")?.valueOf();
+		const size = interaction.options.getInteger("size") ?? EmojiSize.Large;
 
 		if (!emoji || !emoji.includes(":")) {
 			return sendAlertMessage({
 				interaction,
-				content: `Hmm... Invalid emoji.`,
+				content: "Invalid emoji.",
 				type: "error",
 				tag: "Invalid Emoji",
 			});
 		}
 
 		try {
-			const url = getEmojiURL(emoji!, size ?? EmojiSize.Large);
+			const url = getEmojiURL(emoji, size);
+
+			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+				new ButtonBuilder()
+					.setLabel("Open Emoji")
+					.setStyle(ButtonStyle.Link)
+					.setURL(url),
+			);
+
 			return interaction.reply({
-				components: [
-					containerTemplate({
-						description: "Emoji is on below",
-						tag: `Emoji Output`,
-						images: [url],
-					}),
-				],
+				content: `**Emoji URL:**\n${url}`,
+				components: [row],
 			});
-		} catch (error) {
+		} catch {
 			return sendAlertMessage({
 				interaction,
-				content: `Failed to get emoji. Sorry.`,
+				content: "Failed to get emoji.",
 				type: "error",
 				tag: "Emoji Getting",
 			});
