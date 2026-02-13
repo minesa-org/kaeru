@@ -27,7 +27,7 @@ export const emojis = {
 	},
 	reactions: {
 		kaeru: {
-			heart: { id: "1471900805228400763", name: "Heart" },
+			heart: { id: "1471900805228400763", name: "Heart_u" },
 			thumbsup: { id: "1471900810140061836", name: "ThumbsUp_u" },
 			thumbsdown: { id: "1471900808265207890", name: "ThumbsDown_u" },
 			haha: { id: "1471900803819376702", name: "HaHa_u" },
