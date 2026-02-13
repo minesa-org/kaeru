@@ -58,16 +58,8 @@ const emojiURL: BotCommand = {
 		try {
 			const url = getEmojiURL(emoji, size);
 
-			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setLabel("Open Emoji")
-					.setStyle(ButtonStyle.Link)
-					.setURL(url),
-			);
-
 			return interaction.reply({
 				content: `**Emoji URL:**\n${url}`,
-				components: [row],
 			});
 		} catch {
 			return sendAlertMessage({
