@@ -27,12 +27,12 @@ export const emojis = {
 	},
 	reactions: {
 		kaeru: {
-			heart: { id: "1471877443353841845", name: "Heart" },
-			thumbsup: { id: "1471877174855467071", name: "thumbsUp_u" },
-			thumbsdown: { id: "1471877151136546976", name: "thumbsDown_u" },
-			haha: { id: "1471877113979076728", name: "HaHa_u" },
-			emphasize: { id: "1471877094861701171", name: "exclamation_u" },
-			question: { id: "1471877312390758604", name: "question_u" },
+			heart: { id: "1471900805228400763", name: "Heart" },
+			thumbsup: { id: "1471900810140061836", name: "ThumbsUp_u" },
+			thumbsdown: { id: "1471900808265207890", name: "ThumbsDown_u" },
+			haha: { id: "1471900803819376702", name: "HaHa_u" },
+			emphasize: { id: "1471900802074279968", name: "Exclamation_u" },
+			question: { id: "1471900806780420096", name: "Question_u" },
 		},
 		user: {
 			heart: { id: "1375476629316567061", name: "reaction_heart_u" },
