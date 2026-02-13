@@ -19,3 +19,6 @@ yarn-error.log*
 # Build ve cache
 dist/
 .cache/
+
+# Test files
+test.js

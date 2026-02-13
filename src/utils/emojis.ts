@@ -27,12 +27,12 @@ export const emojis = {
 	},
 	reactions: {
 		kaeru: {
-			heart: { id: "1398610708215762976", name: "react_Heart" },
-			thumbsup: { id: "1398610756588535869", name: "react_ThumbsUp" },
-			thumbsdown: { id: "1398610739509461072", name: "react_ThumbsDown" },
-			haha: { id: "1398610688615907428", name: "react_Haha" },
-			emphasize: { id: "1398610644324061326", name: "react_Emphasize" },
-			question: { id: "1398610723751596101", name: "react_Question" },
+			heart: { id: "1471877443353841845", name: "Heart" },
+			thumbsup: { id: "1471877174855467071", name: "thumbsUp_u" },
+			thumbsdown: { id: "1471877151136546976", name: "thumbsDown_u" },
+			haha: { id: "1471877113979076728", name: "HaHa_u" },
+			emphasize: { id: "1471877094861701171", name: "exclamation_u" },
+			question: { id: "1471877312390758604", name: "question_u" },
 		},
 		user: {
 			heart: { id: "1375476629316567061", name: "reaction_heart_u" },
@@ -99,10 +99,10 @@ export const emojis = {
  */
 export type RecursiveKeyOf<TObj extends object> = {
 	[TKey in keyof TObj & string]: TObj[TKey] extends { id: string; name: string }
-		? TKey
-		: TObj[TKey] extends object
-			? `${TKey}` | `${TKey}.${RecursiveKeyOf<TObj[TKey]>}`
-			: never;
+	? TKey
+	: TObj[TKey] extends object
+	? `${TKey}` | `${TKey}.${RecursiveKeyOf<TObj[TKey]>}`
+	: never;
 }[keyof TObj & string];
 
 /**
