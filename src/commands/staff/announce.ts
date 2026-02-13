@@ -3,7 +3,6 @@ import {
 	ChannelType,
 	ContainerBuilder,
 	InteractionContextType,
-	italic,
 	MediaGalleryBuilder,
 	MediaGalleryItemBuilder,
 	MessageFlags,
@@ -321,12 +320,12 @@ const announce: BotCommand = {
 				});
 
 				const reactions = [
-					getEmoji("reactions.user.heart"),
-					getEmoji("reactions.user.thumbsup"),
-					getEmoji("reactions.user.thumbsdown"),
-					getEmoji("reactions.user.haha"),
-					getEmoji("reactions.user.emphasize"),
-					getEmoji("reactions.user.question"),
+					getEmoji("reactions.kaeru.heart"),
+					getEmoji("reactions.kaeru.thumbsup"),
+					getEmoji("reactions.kaeru.thumbsdown"),
+					getEmoji("reactions.kaeru.haha"),
+					getEmoji("reactions.kaeru.emphasize"),
+					getEmoji("reactions.kaeru.question"),
 				];
 
 				for (const reaction of reactions) {
