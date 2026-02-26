@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Verify Linked Roles</title>
+	</head>
+	<body
+		style="
+			background: url(&quot;https://images-ext-1.discordapp.net/external/WMPe6oOL06qWHdDUVzwsgpQ96AXtn2yhCsMoBnggk_8/https/discord.com/assets/1243734d7e2a4654.png?format=webp&quality=lossless&width=940&height=740&quot;)
+				top left repeat;
+			background-color: rgb(49, 48, 48);
+			color: #cbcbcb;
+			font-family:
+				system-ui,
+				-apple-system,
+				BlinkMacSystemFont,
+				&quot;Segoe UI&quot;,
+				Roboto,
+				Oxygen,
+				Ubuntu,
+				Cantarell,
+				&quot;Open Sans&quot;,
+				&quot;Helvetica Neue&quot;,
+				sans-serif;
+			letter-spacing: -1.2%;
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+			overflow: hidden;
+		"
+	>
+		<div style="display: flex; align-items: center">
+			<!-- Discord Logo -->
+			<svg
+				fill="none"
+				height="88"
+				viewBox="0 0 77 88"
+				width="77"
+				xmlns="http://www.w3.org/2000/svg"
+				style="width: 88px; height: 88px"
+			>
+				<path
+					clip-rule="evenodd"
+					d="m65.2166 19.7044c-5.0656-2.3394-10.4047-3.9856-15.8822-4.9213-.7468 1.3552-1.4319 2.743-2.0363 4.1631-5.8278-.8716-11.7672-.8716-17.5989 0-.6198-1.4201-1.3011-2.8079-2.0479-4.1471-5.4968.9361-10.8358 2.5819-15.9015 4.9217-10.0698 14.958-12.78733 29.5608-11.420825 43.9377 5.893285 4.3727 12.483225 7.6967 19.488925 9.8266 1.5744-2.1299 2.9717-4.4048 4.165-6.7771-2.2749-.8551-4.4805-1.9038-6.5784-3.1625.5581-.4031 1.097-.8067 1.6205-1.2587 12.3409 5.8414 26.6063 5.8414 38.9511 0 .5235.436 1.0624.8556 1.6013 1.2587-2.094 1.2426-4.3035 2.3074-6.5746 3.1625 1.2087 2.3723 2.5905 4.6312 4.1611 6.7611 7.0057-2.1299 13.5958-5.4539 19.4891-9.8266h.0191c1.6013-16.6522-2.7329-31.11-11.4555-43.9381zm-39.5092 35.1085c-3.7993 0-6.9287-3.5015-6.9287-7.7612 0-4.2598 3.0524-7.7613 6.9287-7.7613 3.8762 0 6.9865 3.5015 6.9249 7.7613 0 4.2597-3.0679 7.7612-6.9249 7.7612zm25.5748 0c-3.7993 0-6.9288-3.5015-6.9288-7.7612 0-4.2598 3.0679-7.7613 6.9288-7.7613 3.857 0 6.9864 3.5015 6.9248 7.7613 0 4.2597-3.0678 7.7612-6.9248 7.7612z"
+					fill="#fff"
+					fill-rule="evenodd"
+				/>
+			</svg>
+
+			<!-- Plus Icon -->
+			<svg
+				height="28"
+				viewBox="0 0 28 28"
+				width="28"
+				xmlns="http://www.w3.org/2000/svg"
+				style="width: 28px; height: 28px; margin: 1em 37px"
+			>
+				<path
+					d="m138 42h-10.008756c-1.091346 0-1.991244.8954305-1.991244 2 0 1.1122704.89151 2 1.991244 2h10.008756v10.0087557c0 1.0913468.895431 1.9912443 2 1.9912443 1.11227 0 2-.8915104 2-1.9912443v-10.0087557h10.008756c1.091346 0 1.991244-.8954305 1.991244-2 0-1.1122704-.89151-2-1.991244-2h-10.008756v-10.0087557c0-1.0913468-.895431-1.9912443-2-1.9912443-1.11227 0-2 .8915104-2 1.9912443z"
+					fill="#949cf7"
+					fill-rule="evenodd"
+					transform="translate(-126 -30)"
+				/>
+			</svg>
+
+			<!-- Logo Placeholder -->
+			<div
+				style="
+					width: 88px;
+					height: 88px;
+					border-radius: 100%;
+					border: 3px solid #949494;
+					border-style: dashed;
+					background: #1d1d1d;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				"
+			></div>
+		</div>
+
+		<div style="margin-top: 16px; color: hsl(0 0% 100%); text-align: center">
+			Redirecting to <strong>Discord</strong> to verify your roles
+		</div>
+
+		<div style="margin-top: 16px; font-size: 16px; color: hsl(214 8.1% 61.2%); text-align: center">
+			This only takes a moment.
+		</div>
+
+		<script>
+			// Added logging to help identify why a redirect might fail
+			const oauthUrl = "{{OAUTH_URL_RAW}}";
+			const isPlaceholder =
+				typeof oauthUrl !== "string" || !oauthUrl.length || oauthUrl.includes("{{");
+
+			console.log("[LinkedRoles] OAuth URL available:", !isPlaceholder);
+
+			if (!isPlaceholder) {
+				console.log("[LinkedRoles] Redirecting to:", oauthUrl);
+				window.location.replace(oauthUrl);
+			} else {
+				console.error("[LinkedRoles] OAuth URL is a placeholder, redirect aborted.");
+				document.querySelector("div:nth-of-type(2)").innerHTML =
+					"<strong>ERROR: Redirect failed</strong>";
+			}
+		</script>
+	</body>
+</html>
