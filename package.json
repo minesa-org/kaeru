@@ -18,7 +18,7 @@
   "license": "MIT",
   "type": "module",
   "devDependencies": {
-    "@types/node": "^22.8.1",
+    "@types/node": "^25.3.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
