@@ -2,14 +2,16 @@ import {
 	CommandContext,
 	ContainerBuilder,
 	IntegrationType,
-	InteractionCommand,
 	InteractionFlags,
 	MessageCommandBuilder,
-	MessageContextMenuInteraction,
 	TextDisplayBuilder,
 } from "@minesa-org/mini-interaction";
-import { KARU_AI } from "../config/ai.js";
-import { getEmoji, langMap, log, sendAlertMessage } from "../utils/index.js";
+import type {
+	InteractionCommand,
+	MessageContextMenuInteraction,
+} from "@minesa-org/mini-interaction";
+import { KARU_AI } from "../config/ai.ts";
+import { getEmoji, langMap, log, sendAlertMessage } from "../utils/index.ts";
 
 function splitMessageBy2000(str: string) {
 	const chunks: string[] = [];
@@ -58,7 +60,7 @@ const messageTranslate: InteractionCommand = {
 			const targetLang = langMap[fullLocale.toLowerCase()] || langMap[rawLang] || "english";
 
 			const model = KARU_AI.getGenerativeModel({
-				model: "gemini-2.0-flash", // Using a stable model name
+				model: "gemma-3n-e4b-it",
 				generationConfig: {
 					temperature: 0.3,
 					maxOutputTokens: 1200,

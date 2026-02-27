@@ -7,7 +7,8 @@ import {
 	TextDisplayBuilder,
 	ThumbnailBuilder,
 } from "@minesa-org/mini-interaction";
-import { emojis, getEmoji, RecursiveKeyOf } from "./emojis.js";
+import { emojis, getEmoji } from "./emojis.ts";
+import type { RecursiveKeyOf } from "./emojis.ts";
 
 type AlertType = "error" | "info";
 

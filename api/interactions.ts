@@ -1,14 +1,7 @@
-import { MiniInteraction } from '@minesa-org/mini-interaction'
+import { MiniInteraction } from "@minesa-org/mini-interaction";
 
-export const mini = new MiniInteraction()
+export const mini = new MiniInteraction({
+	debug: process.env.NODE_ENV !== "production", // Optional debug flag
+});
 
-export default mini.createNodeHandler({
-  waitUntil: async (promise) => {
-    try {
-      const { waitUntil } = await import('@vercel/functions')
-      waitUntil(promise)
-    } catch (e) {
-      console.log(e)
-    }
-  }
-})
+export default mini.createNodeHandler();
