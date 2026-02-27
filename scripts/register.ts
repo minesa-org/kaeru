@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { mini } from '../api/interactions'
 
 if (!process.env.DISCORD_BOT_TOKEN) {
