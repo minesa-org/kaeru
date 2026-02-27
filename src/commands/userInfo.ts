@@ -45,23 +45,12 @@ const userInfo: InteractionCommand = {
 		const targetId = interaction.data.target_id;
 		if (!targetId) throw new Error("Target user ID missing.");
 
-		const response = await fetch(
-			`https://discord.com/api/v10/users/${targetId}`,
-			{
-				headers: {
-					Authorization: `Bot ${interaction.client.token}`,
-				},
-			}
-		);
+		const targetUser =
+			interaction.data.resolved?.users?.[targetId];
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(
-				`Discord API Error: ${response.status} - ${errorText}`
-			);
+		if (!targetUser) {
+			throw new Error("User not found in resolved data.");
 		}
-
-		const targetUser = await response.json();
 
 		const avatarUrl = targetUser.avatar
 			? `https://cdn.discordapp.com/avatars/${targetUser.id}/${targetUser.avatar}.png?size=4096`
