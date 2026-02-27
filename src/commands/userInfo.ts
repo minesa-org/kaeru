@@ -45,22 +45,50 @@ const userInfo: InteractionCommand = {
 		const targetId = interaction.data.target_id;
 		if (!targetId) throw new Error("Target user ID missing.");
 
-		const targetUser =
-			interaction.data.resolved?.users?.[targetId];
+		let targetUser = interaction.data.resolved?.users?.[targetId];
+		const targetMember = interaction.data.resolved?.members?.[targetId];
 
 		if (!targetUser) {
 			throw new Error("User not found in resolved data.");
 		}
 
-		const avatarUrl = targetUser.avatar
-			? `https://cdn.discordapp.com/avatars/${targetUser.id}/${targetUser.avatar}.png?size=4096`
-			: `https://cdn.discordapp.com/embed/avatars/${Number(
-					(BigInt(targetUser.id) >> 22n) % 6n
-			  )}.png`;
+		// If banner/accent_color is missing, try to fetch full user from API to get the missing details
+		if (targetUser.banner === undefined || targetUser.accent_color === undefined) {
+			try {
+				const res = await fetch(`https://discord.com/api/v10/users/${targetId}`, {
+					headers: {
+						Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+					},
+				});
+				if (res.ok) {
+					const fullUser = await res.json();
+					targetUser = { ...targetUser, ...fullUser };
+				}
+			} catch (error) {
+				// Fallback to what we have
+			}
+		}
 
-		const bannerUrl = targetUser.banner
+		// Banner URL Construction (Guild Banner -> Global Banner)
+		const bannerUrl = targetMember?.banner
+			? `https://cdn.discordapp.com/guilds/${interaction.guild_id}/users/${targetUser.id}/banners/${targetMember.banner}.png?size=4096`
+			: targetUser.banner
 			? `https://cdn.discordapp.com/banners/${targetUser.id}/${targetUser.banner}.png?size=4096`
 			: null;
+
+		// Avatar URL Construction (Guild Avatar -> Global Avatar -> Default)
+		const avatarUrl = targetMember?.avatar
+			? `https://cdn.discordapp.com/guilds/${interaction.guild_id}/users/${targetUser.id}/avatars/${targetMember.avatar}.png?size=4096`
+			: targetUser.avatar
+			? `https://cdn.discordapp.com/avatars/${targetUser.id}/${targetUser.avatar}.png?size=4096`
+			: `https://cdn.discordapp.com/embed/avatars/${Number(
+					(BigInt(targetUser.id) >> 22n) % 6n,
+			  )}.png`;
+
+		const avatarDecoHash = targetUser.avatar_decoration_data?.asset;
+		const avatarDecoLine = avatarDecoHash
+			? `**Avatar Decoration:** [Decoration URL](https://cdn.discordapp.com/avatar-decoration-assets/${avatarDecoHash}.png)`
+			: "";
 
 		const accentColor = targetUser.accent_color ?? 0xac8e68;
 
@@ -68,7 +96,9 @@ const userInfo: InteractionCommand = {
 			[
 				`# ${getEmoji("avatar")} User Information`,
 				`**Name:** ${
-					targetUser.global_name ?? targetUser.username
+					targetMember?.nick ??
+					targetUser.global_name ??
+					targetUser.username
 				} (\`@${targetUser.username}\`)`,
 				`**User ID:** \`${targetUser.id}\``,
 				`**Accent Color:** ${
@@ -78,14 +108,15 @@ const userInfo: InteractionCommand = {
 								.padStart(6, "0")}`
 						: "Using a banner."
 				}`,
+				avatarDecoLine,
 				`-# You can also see other details on their profile.`,
-			].join("\n"),
+			]
+				.filter(Boolean)
+				.join("\n"),
 		);
 
 		const section = new SectionBuilder()
-			.setAccessory(
-				new ThumbnailBuilder().setMedia({ url: avatarUrl })
-			)
+			.setAccessory(new ThumbnailBuilder().setMedia({ url: avatarUrl }))
 			.addComponent(textDisplay);
 
 		const container1 = new ContainerBuilder()
@@ -96,14 +127,14 @@ const userInfo: InteractionCommand = {
 
 		if (bannerUrl) {
 			const mediaGallery = new GalleryBuilder().addItem(
-				new GalleryItemBuilder().setMedia({ url: bannerUrl })
+				new GalleryItemBuilder().setMedia({ url: bannerUrl }),
 			);
 
 			const container2 = new ContainerBuilder()
 				.addComponent(
 					new TextDisplayBuilder().setContent(
-						`# ${getEmoji("banner")} Banner`
-					)
+						`# ${getEmoji("banner")} Banner`,
+					),
 				)
 				.addComponent(mediaGallery);
 
