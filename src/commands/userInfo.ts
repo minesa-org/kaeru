@@ -49,13 +49,16 @@ const userInfo: InteractionCommand = {
 			`https://discord.com/api/v10/users/${targetId}`,
 			{
 				headers: {
-					Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+					Authorization: `Bot ${interaction.client.token}`,
 				},
 			}
 		);
 
 		if (!response.ok) {
-			throw new Error("Failed to fetch user from Discord API.");
+			const errorText = await response.text();
+			throw new Error(
+				`Discord API Error: ${response.status} - ${errorText}`
+			);
 		}
 
 		const targetUser = await response.json();
