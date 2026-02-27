@@ -19,14 +19,6 @@ import { getEmoji } from "../utils/index.ts";
 const userInfo: InteractionCommand = {
 	data: new UserCommandBuilder()
 		.setName("User Information")
-		.setNameLocalizations({
-			tr: "Kullanıcı Bilgisi",
-			it: "Informazioni Utente",
-			ro: "Informații Utilizator",
-			el: "Πληροφορίες Χρήστη",
-			"pt-BR": "Informações do Usuário",
-			"zh-CN": "用户信息",
-		})
 		.setIntegrationTypes([
 			IntegrationType.UserInstall,
 			IntegrationType.GuildInstall,
@@ -53,57 +45,38 @@ const userInfo: InteractionCommand = {
 		const targetId = interaction.data.target_id;
 		if (!targetId) throw new Error("Target user ID missing.");
 
-		const targetUser =
-			interaction.targetUser ??
-			(await interaction.client.users.fetch(targetId));
+		const response = await fetch(
+			`https://discord.com/api/v10/users/${targetId}`,
+			{
+				headers: {
+					Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+				},
+			}
+		);
 
-		if (!targetUser) {
-			throw new Error("Target user not found.");
+		if (!response.ok) {
+			throw new Error("Failed to fetch user from Discord API.");
 		}
 
-		const targetMember =
-			interaction.data.resolved?.members?.[targetId];
+		const targetUser = await response.json();
 
-		const accentColor = targetUser.accent_color ?? 0xac8e68;
-
-		/* ---------------- AVATAR ---------------- */
-
-		const avatarUrl = targetMember?.avatar
-			? `https://cdn.discordapp.com/guilds/${interaction.guild_id}/users/${targetUser.id}/avatars/${targetMember.avatar}.png?size=4096`
-			: targetUser.avatar
+		const avatarUrl = targetUser.avatar
 			? `https://cdn.discordapp.com/avatars/${targetUser.id}/${targetUser.avatar}.png?size=4096`
 			: `https://cdn.discordapp.com/embed/avatars/${Number(
 					(BigInt(targetUser.id) >> 22n) % 6n
 			  )}.png`;
 
-		/* ---------------- BANNER ---------------- */
-
 		const bannerUrl = targetUser.banner
 			? `https://cdn.discordapp.com/banners/${targetUser.id}/${targetUser.banner}.png?size=4096`
 			: null;
 
-		/* ------------- AVATAR DECORATION -------- */
-
-		const avatarDecoHash =
-			targetUser.avatar_decoration_data?.asset;
-
-		const avatarDecoURL = avatarDecoHash
-			? `https://cdn.discordapp.com/avatar-decoration-assets/${avatarDecoHash}.png`
-			: null;
-
-		const avatarDecoLine = avatarDecoURL
-			? `**Avatar Decoration:** [Decoration URL](${avatarDecoURL})`
-			: "";
-
-		/* ---------------- TEXT ---------------- */
+		const accentColor = targetUser.accent_color ?? 0xac8e68;
 
 		const textDisplay = new TextDisplayBuilder().setContent(
 			[
 				`# ${getEmoji("avatar")} User Information`,
 				`**Name:** ${
-					targetMember?.nick ??
-					targetUser.global_name ??
-					targetUser.username
+					targetUser.global_name ?? targetUser.username
 				} (\`@${targetUser.username}\`)`,
 				`**User ID:** \`${targetUser.id}\``,
 				`**Accent Color:** ${
@@ -113,11 +86,8 @@ const userInfo: InteractionCommand = {
 								.padStart(6, "0")}`
 						: "Using a banner."
 				}`,
-				avatarDecoLine,
 				`-# You can also see other details on their profile.`,
-			]
-				.filter(Boolean)
-				.join("\n"),
+			].join("\n"),
 		);
 
 		const section = new SectionBuilder()
@@ -131,8 +101,6 @@ const userInfo: InteractionCommand = {
 			.addComponent(section);
 
 		const components: ContainerBuilder[] = [container1];
-
-		/* ---------------- BANNER CONTAINER ---------------- */
 
 		if (bannerUrl) {
 			const mediaGallery = new GalleryBuilder().addItem(
