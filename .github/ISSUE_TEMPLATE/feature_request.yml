@@ -1,7 +1,7 @@
 name: Feature Request
 description: Please explain what is in your mind, we would like to hear it!
-labels: "feature"
-assignees: "Neodevils"
+labels: 'feature'
+assignees: 'Neodevils'
 
 body:
   - type: markdown

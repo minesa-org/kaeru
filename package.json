@@ -1,31 +1,31 @@
 {
-	"name": "@minesa-org/kaeru",
-	"version": "2.0.0",
-	"description": "AI support bot for Discord servers & users",
-	"main": "index.js",
-	"scripts": {
-		"build": "tsx scripts/register.ts"
-	},
-	"keywords": [
-		"discord",
-		"bot",
-		"ai",
-		"support",
-		"kaeru"
-	],
-	"author": "Neodevils",
-	"license": "MIT",
-	"type": "module",
-	"devDependencies": {
-		"@types/node": "^22.8.1",
-		"tsx": "^4.20.6",
-		"typescript": "^5.9.3"
-	},
-	"dependencies": {
-		"@google/generative-ai": "^0.24.1",
-		"@minesa-org/mini-interaction": "^0.3.9",
-		"@vercel/functions": "^1.6.0",
-		"dotenv": "^17.2.3",
-		"mongodb": "^7.0.0"
-	}
+  "name": "@minesa-org/kaeru",
+  "version": "2.0.0",
+  "description": "AI support bot for Discord servers & users",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsx scripts/register.ts"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "ai",
+    "support",
+    "kaeru"
+  ],
+  "author": "Neodevils",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.8.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@minesa-org/mini-interaction": "^0.3.9",
+    "@vercel/functions": "^1.6.0",
+    "dotenv": "^17.2.3",
+    "mongodb": "^7.0.0"
+  }
 }
