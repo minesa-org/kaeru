@@ -4,7 +4,8 @@
   "description": "AI support bot for Discord servers & users",
   "main": "index.js",
   "scripts": {
-    "build": "tsx scripts/register.ts"
+    "build": "tsx scripts/register.ts",
+    "production": "vercel --prod"
   },
   "keywords": [
     "discord",
