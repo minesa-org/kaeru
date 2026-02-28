@@ -41,7 +41,7 @@ export function containerTemplate({
 	thumbnail,
 }: {
 	tag: string;
-	description: string;
+	description: string | string[];
 	title?: string;
 	thumbnail?: string;
 }): ContainerBuilder {
@@ -53,7 +53,12 @@ export function containerTemplate({
 
 	const lines: string[] = [];
 	if (title) lines.push(`# ${title}`);
-	lines.push(description);
+
+	if (Array.isArray(description)) {
+		lines.push(...description);
+	} else {
+		lines.push(description);
+	}
 
 	const textDisplay = new TextDisplayBuilder().setContent(lines.join("\n"));
 
