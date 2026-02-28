@@ -1,7 +1,12 @@
 export const emojis = {
 	ticket: {
-		create: { id: "1331654460325498931", name: "ticket" },
+		create: { id: "1477220706797486161", name: "thread_create" },
 		created: { id: "1331655022357905419", name: "ticket_created" },
+		thread: { id: "1477220708601040896", name: "thread" },
+		archive: {
+			user: { id: "1477220705492930560", name: "thread_archive_user" },
+			server: { id: "1477220703563415644", name: "thread_archive_server" },
+		},
 		bubble: {
 			done: { id: "1398639729070706698", name: "bubble_done" },
 			stale: { id: "1398639787891621888", name: "bubble_stale" },
@@ -25,6 +30,11 @@ export const emojis = {
 			help: { id: "1375482474280255539", name: "label_help" },
 		} satisfies Record<string, { id: string; name: string }>,
 	},
+	sharedwithu: { id: "1477220702305255431", name: "sharedwithu" },
+	seal: { id: "1477220700665286656", name: "seal" },
+	reply: { id: "1477220699272642681", name: "reply" },
+	timer: { id: "1477221006660599808", name: "timer" },
+	success: { id: "1477220700665286656", name: "seal" },
 	reactions: {
 		kaeru: {
 			heart: { id: "1471900805228400763", name: "Heart_u" },
@@ -126,4 +136,27 @@ export function getEmoji(path: RecursiveKeyOf<typeof emojis>): string {
 	}
 
 	return `<:${current.name}:${current.id}>`;
+}
+
+/**
+ * Gets the raw emoji data for a given path.
+ * @param path The path to the emoji, e.g. "ticket.create"
+ * @returns The emoji data object, e.g. { id: "...", name: "..." }
+ */
+export function getEmojiData(path: RecursiveKeyOf<typeof emojis>): { id: string; name: string } {
+	const parts = path.split(".");
+	let current: any = emojis;
+
+	for (const part of parts) {
+		if (!current[part]) {
+			throw new Error(`Emoji path '${path}' not found.`);
+		}
+		current = current[part];
+	}
+
+	if (!("id" in current && "name" in current)) {
+		throw new Error(`Emoji path '${path}' does not resolve to an emoji.`);
+	}
+
+	return current;
 }

@@ -1,83 +1,930 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connected to Kaeru!</title>
-  </head>
-  <body
-    style="
-      background: url('https://images-ext-1.discordapp.net/external/WMPe6oOL06qWHdDUVzwsgpQ96AXtn2yhCsMoBnggk_8/https/discord.com/assets/1243734d7e2a4654.png?format=webp&quality=lossless&width=940&height=740')
-        top left repeat;
-      background-color: rgb(49, 48, 48);
-      color: #cbcbcb;
-      font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        Roboto,
-        Oxygen,
-        Ubuntu,
-        Cantarell,
-        'Open Sans',
-        'Helvetica Neue',
-        sans-serif;
-      letter-spacing: -1.2%;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      overflow: hidden;
-    "
-  >
-    <div style="display: flex; align-items: center">
-      <svg
-        fill="none"
-        height="88"
-        viewBox="0 0 77 88"
-        width="77"
-        xmlns="http://www.w3.org/2000/svg"
-        style="width: 88px; height: 88px"
-      >
-        <path
-          clip-rule="evenodd"
-          d="m65.2166 19.7044c-5.0656-2.3394-10.4047-3.9856-15.8822-4.9213-.7468 1.3552-1.4319 2.743-2.0363 4.1631-5.8278-.8716-11.7672-.8716-17.5989 0-.6198-1.4201-1.3011-2.8079-2.0479-4.1471-5.4968.9361-10.8358 2.5819-15.9015 4.9217-10.0698 14.958-12.78733 29.5608-11.420825 43.9377 5.893285 4.3727 12.483225 7.6967 19.488925 9.8266 1.5744-2.1299 2.9717-4.4048 4.165-6.7771-2.2749-.8551-4.4805-1.9038-6.5784-3.1625.5581-.4031 1.097-.8067 1.6205-1.2587 12.3409 5.8414 26.6063 5.8414 38.9511 0 .5235.436 1.0624.8556 1.6013 1.2587-2.094 1.2426-4.3035 2.3074-6.5746 3.1625 1.2087 2.3723 2.5905 4.6312 4.1611 6.7611 7.0057-2.1299 13.5958-5.4539 19.4891-9.8266h.0191c1.6013-16.6522-2.7329-31.11-11.4555-43.9381zm-39.5092 35.1085c-3.7993 0-6.9287-3.5015-6.9287-7.7612 0-4.2598 3.0524-7.7613 6.9287-7.7613 3.8762 0 6.9865 3.5015 6.9249 7.7613 0 4.2597-3.0679 7.7612-6.9249 7.7612zm25.5748 0c-3.7993 0-6.9288-3.5015-6.9288-7.7612 0-4.2598 3.0679-7.7613 6.9288-7.7613 3.857 0 6.9864 3.5015 6.9248 7.7613 0 4.2597-3.0678 7.7612-6.9248 7.7612z"
-          fill="#fff"
-          fill-rule="evenodd"
-        />
-      </svg>
-      <svg
-        height="28"
-        viewBox="0 0 28 28"
-        width="28"
-        xmlns="http://www.w3.org/2000/svg"
-        style="width: 28px; height: 28px; margin: 1em 37px"
-      >
-        <path
-          d="m138 42h-10.008756c-1.091346 0-1.991244.8954305-1.991244 2 0 1.1122704.89151 2 1.991244 2h10.008756v10.0087557c0 1.0913468.895431 1.9912443 2 1.9912443 1.11227 0 2-.8915104 2-1.9912443v-10.0087557h10.008756c1.091346 0 1.991244-.8954305 1.991244-2 0-1.1122704-.89151-2-1.991244-2h-10.008756v-10.0087557c0-1.0913468-.895431-1.9912443-2-1.9912443-1.11227 0-2 .8915104-2 1.9912443z"
-          fill="#949cf7"
-          fill-rule="evenodd"
-          transform="translate(-126 -30)"
-        />
-      </svg>
-      <img src="" style="width: 88px; height: 88px; border-radius: 100%" draggable="false" alt="" />
-    </div>
-    <div style="margin-top: 16px; color: hsl(0 calc(1 * 0%) 100% / 1); text-align: center">
-      <strong>Kaeru</strong> has connected to your
-      <strong>Discord</strong>
-    </div>
-    <div
-      style="
-        margin-top: 16px;
-        font-size: 16px;
-        color: hsl(214 calc(1 * 8.1%) 61.2% / 1);
-        text-align: center;
-      "
-    >
-      You can close this window and return to Discord.
-    </div>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			:root {
+				/* Base Colors */
+				--primary-color: #b38d70;
+				--base-black: #292524;
+				--base-gray: #9e9894e6;
+
+				/* Leaf Colors */
+				--leaf-color-1: #fd9b62;
+				--leaf-color-2: #fdc562;
+
+				/* Backgrounds */
+				--background-body: #fff1e0;
+				--background-button: #2925240d;
+
+				/* Selection Color */
+				--selection-color: #2925241a;
+
+				/* Label */
+				--label-color: #1c191799;
+				--label-background: #1c191705;
+				--label-border: #1c191726;
+
+				/* Fonts */
+				--font-family:
+					ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+					"Segoe UI Symbol", "Noto Color Emoji";
+			}
+
+			::selection {
+				background: var(--selection-color);
+			}
+
+			::-webkit-scrollbar {
+				display: none;
+			}
+
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			* {
+				::-webkit-scrollbar {
+					display: none;
+				}
+
+				::-webkit-scrollbar-track {
+					background: transparent;
+				}
+			}
+
+			html,
+			body {
+				height: 100vh;
+				overflow: hidden;
+			}
+
+			body {
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				font-family: var(--font-family);
+				background: var(--background-body);
+				color: var(--base-black);
+			}
+
+			header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 1rem 2rem;
+				width: 100%;
+			}
+
+			.header-links {
+				flex: 1;
+				display: flex;
+				gap: 1.5rem;
+				justify-content: end;
+			}
+
+			.header-link {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.9rem;
+				font-weight: 500;
+				color: var(--base-black);
+				text-decoration: none;
+				opacity: 0.7;
+				transition: opacity 0.2s ease;
+			}
+
+			.header-link:hover {
+				opacity: 1;
+			}
+
+			.header-link svg {
+				width: 12px;
+				height: 12px;
+				transition: transform 0.2s ease;
+			}
+
+			.header-link:hover svg {
+				transform: translate(2px, -2px);
+			}
+
+			.header-center {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 2rem;
+				flex: 1;
+			}
+
+			.header-spacer {
+				flex: 1;
+			}
+
+			main {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				gap: 3rem;
+				flex: 1;
+				width: 100%;
+				padding: 0;
+			}
+
+			main section {
+				position: relative;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				max-width: 1200px;
+				width: 100%;
+			}
+
+			main section > div {
+				position: relative;
+				width: 580px;
+				height: 349px;
+				scale: 0.8;
+			}
+
+			main section div[role="text"] {
+				position: absolute;
+				left: 180px;
+				top: 300px;
+				background: #fff0de;
+				border: 1px solid #decab1;
+				box-shadow:
+					0px 97px 39px rgba(0, 0, 0, 0.01),
+					0px 54px 33px rgba(0, 0, 0, 0.05),
+					0px 24px 24px rgba(0, 0, 0, 0.09),
+					0px 6px 13px rgba(0, 0, 0, 0.1);
+				border-radius: 19px;
+				transform: rotate(4.01deg);
+				padding: 20px;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 8px;
+				z-index: 3;
+			}
+
+			main section .kaeru_mascot {
+				position: absolute;
+				width: 400px;
+				left: 50px;
+				top: 0px;
+				object-fit: cover;
+			}
+
+			main section .kaeru_sticker {
+				position: absolute;
+				right: -2rem;
+				top: 50%;
+				transform: translateY(0%) translateX(0%) scale(0.7) rotate(15deg);
+				width: 10rem;
+				height: auto;
+				z-index: 2;
+				transition: transform 0.3s ease;
+			}
+
+			main section .kaeru_sticker:hover {
+				transform: translateY(0%) translateX(0%) scale(0.55) rotate(15deg);
+			}
+
+			main section .verified_icon {
+				width: 2.5rem;
+				height: auto;
+			}
+
+			main section .trusted {
+				position: absolute;
+				left: 0%;
+				top: 0%;
+				transform: rotate(-15deg) scale(0.8);
+				width: 10rem;
+				height: auto;
+				z-index: 2;
+				transition: transform 0.3s ease;
+			}
+
+			main section .trusted:hover {
+				transform: rotate(-25deg) scale(1);
+			}
+
+			main section div[role="text"] h1 {
+				width: 100%;
+				font-family: var(--font-family);
+				font-style: normal;
+				font-weight: 700;
+				font-size: 32px;
+				line-height: 36px;
+				letter-spacing: -0.025em;
+				color: var(--base-black);
+				margin: 0;
+				flex: none;
+				order: 0;
+				align-self: stretch;
+				flex-grow: 0;
+			}
+
+			main section div[role="text"] h1 span {
+				background: linear-gradient(90deg, rgba(102, 91, 82, 0.9) 0%, #ff980767 100%);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			main section div[role="text"] p {
+				width: 100%;
+				font-family: var(--font-family);
+				font-style: normal;
+				font-weight: 700;
+				font-size: 16px;
+				line-height: 20px;
+				letter-spacing: -0.025em;
+				color: #000000;
+				margin: 0;
+				flex: none;
+				order: 1;
+				align-self: stretch;
+				flex-grow: 0;
+			}
+
+			button {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 1rem;
+				padding: 1rem 2rem;
+				border: none;
+				border-radius: 1rem;
+				background: var(--background-button);
+				color: var(--base-black);
+				font-size: 1.5rem;
+				font-weight: 700;
+				cursor: pointer;
+			}
+
+			button sub {
+				background-color: var(--base-black);
+				border-radius: 6px;
+				font-weight: 700;
+				color: var(--background-body);
+				padding: 0.25rem 0.5rem;
+				font-size: 0.75rem;
+			}
+
+			button:hover .verified_background {
+				animation: spin 4s linear infinite;
+				transform-origin: center;
+				fill: rgba(251, 113, 133, 0.75);
+			}
+
+			@keyframes spin {
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			footer {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				pointer-events: none;
+				z-index: 1;
+			}
+
+			footer .big-text {
+				position: absolute;
+				left: 50%;
+				bottom: 1%;
+				transform: translateX(-50%);
+				font-size: 12rem;
+				font-weight: 900;
+				color: transparent;
+				background: linear-gradient(to bottom, #b38d701a 50%, #b38d7000);
+				-webkit-background-clip: text;
+				background-clip: text;
+				pointer-events: none;
+				user-select: none;
+				overflow: hidden;
+				height: 8rem;
+			}
+
+			img.ellipses {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: auto;
+				pointer-events: none;
+				z-index: -1;
+			}
+
+			@media (max-width: 768px) {
+				header .header-spacer {
+					flex: 0;
+				}
+				header .header-link {
+					font-size: 0.8rem;
+				}
+			}
+
+			@media (max-width: 600px) {
+				main section div[role="text"] {
+					left: 50px;
+					top: 200px;
+					transform: rotate(0deg);
+				}
+				main section .kaeru_mascot {
+					width: 300px;
+					left: 25%;
+					top: 0px;
+				}
+				main section .kaeru_sticker {
+					width: 8rem;
+					right: -1rem;
+					top: 50%;
+				}
+				main section .trusted {
+					width: 8rem;
+					left: 0%;
+					top: 0%;
+					transform: rotate(-15deg) scale(0.8);
+				}
+				main section div[role="text"] {
+					height: auto;
+					padding: 1rem;
+				}
+				main section div[role="text"] h1 {
+					font-size: 2rem;
+					line-height: 2.5rem;
+				}
+				main section div[role="text"] p {
+					font-size: 1rem;
+					line-height: 1.5rem;
+				}
+
+				.ellipses {
+					position: absolute;
+					top: 50%;
+					left: 0;
+					transform: translateY(50%);
+					width: 100%;
+					height: auto;
+				}
+			}
+
+			@media (max-width: 400px) {
+				main section .kaeru_mascot {
+					width: 250px;
+					left: 10%;
+					top: 0px;
+				}
+			}
+
+			.modal {
+				display: none;
+				position: fixed;
+				z-index: 1000;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.5);
+				backdrop-filter: blur(4px);
+			}
+
+			.modal.show {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				animation: fadeIn 0.3s ease;
+			}
+
+			.modal-content {
+				background: var(--background-body);
+				border: 1px solid #decab1;
+				border-radius: 1rem;
+				box-shadow:
+					0px 97px 39px rgba(0, 0, 0, 0.01),
+					0px 54px 33px rgba(0, 0, 0, 0.05),
+					0px 24px 24px rgba(0, 0, 0, 0.09),
+					0px 6px 13px rgba(0, 0, 0, 0.1);
+				max-width: 800px;
+				max-height: 80vh;
+				width: 90%;
+				margin: 2rem;
+				position: relative;
+				animation: slideIn 0.3s ease;
+				overflow: hidden;
+			}
+
+			.modal-header {
+				padding: 2rem 2rem 1rem 2rem;
+				border-bottom: 1px solid #decab1;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.modal-header h1 {
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: var(--base-black);
+				margin: 0;
+			}
+
+			.modal-close {
+				background: none;
+				border: none;
+				font-size: 1.5rem;
+				cursor: pointer;
+				color: var(--base-black);
+				opacity: 0.7;
+				transition: opacity 0.2s ease;
+				padding: 0.5rem;
+				border-radius: 0.5rem;
+			}
+
+			.modal-close:hover {
+				opacity: 1;
+				background: var(--background-button);
+			}
+
+			.modal-body {
+				padding: 2rem;
+				overflow-y: auto;
+				max-height: calc(80vh - 120px);
+			}
+
+			.modal-body .muted {
+				color: var(--base-gray);
+				font-size: 0.9rem;
+				margin-bottom: 2rem;
+			}
+
+			.modal-body ol {
+				list-style: decimal;
+				padding-left: 1.5rem;
+				margin-bottom: 2rem;
+			}
+
+			.modal-body li {
+				margin-bottom: 1.5rem;
+			}
+
+			.modal-body li strong {
+				font-weight: 700;
+				color: var(--base-black);
+				display: block;
+				margin-bottom: 0.5rem;
+			}
+
+			.modal-body li p {
+				line-height: 1.6;
+				color: var(--base-black);
+				margin: 0;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+
+			@keyframes slideIn {
+				from {
+					opacity: 0;
+					transform: translateY(-20px) scale(0.95);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
+			}
+
+			@media (max-width: 768px) {
+				.modal-content {
+					width: 95%;
+					margin: 1rem;
+					max-height: 90vh;
+				}
+
+				.modal-header {
+					padding: 1.5rem 1.5rem 1rem 1.5rem;
+				}
+
+				.modal-header h1 {
+					font-size: 1.25rem;
+				}
+
+				.modal-body {
+					padding: 1.5rem;
+					max-height: calc(90vh - 100px);
+				}
+			}
+		</style>
+		<meta name="theme-color" content="#b38d70" />
+		<title>Kaeru — Connected</title>
+	</head>
+	<body>
+		<img class="ellipses" src="https://kaeru-redirect-cdn.onrender.com/ellipses.webp" alt="" />
+		<header>
+			<div class="header-spacer"></div>
+
+			<div class="header-center">
+				<!-- Minesa Logo -->
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 500 500"
+					fill="none"
+					preserveAspectRatio="xMidYMid meet"
+					width="68"
+					height="68"
+				>
+					<path
+						d="M177.174 140.806C186.016 166.418 194.861 198.905 203.708 238.267C204.885 243.442 204.36 248.194 202.133 252.522C199.998 256.687 196.866 259.752 192.736 261.717C188.735 263.647 184.518 264.811 180.087 265.21C175.619 265.481 171.451 264.363 167.58 261.856C163.71 259.349 161.094 255.671 159.733 250.821C158.515 246.482 156.615 237.999 154.034 225.373L150.534 236.447C148.912 243.908 144.075 248.75 136.026 250.973C128.231 253.125 121.394 251.575 115.514 246.323L106.448 238.306C107.057 240.476 108.321 244.733 110.241 251.079C112.287 257.39 113.633 261.694 114.278 263.991C115.998 270.117 115.105 275.52 111.6 280.201C108.06 284.754 103.542 287.789 98.048 289.306C92.8092 290.752 87.2963 290.487 81.5094 288.509C75.8144 286.369 72.079 282.381 70.3032 276.546C58.8257 242.035 49.8559 209.102 43.3939 177.745C41.8939 171.421 43.2797 165.813 47.5512 160.92C51.9146 155.865 57.3981 152.838 64.0019 151.84C70.7334 150.806 76.4689 152.111 81.2086 155.752C95.1411 165.657 106.834 174.942 116.289 183.608C120.904 168.17 126.958 152.953 134.451 137.957C136.694 134.175 139.962 131.348 144.255 129.475C148.512 127.474 152.754 126.647 156.982 126.992C161.301 127.175 165.396 128.519 169.266 131.026C173.1 133.405 175.737 136.665 177.174 140.806Z"
+						fill="currentColor"
+						id="element-6"
+					/>
+					<path
+						d="M281.806 320.481C292.59 314.327 303.176 308.508 313.565 303.025C324.135 297.594 334.657 293.329 345.13 290.23C355.667 287.247 365.383 285.546 374.276 285.125C383.287 284.641 391.508 286.332 398.938 290.198C406.549 294.117 412.715 300.264 417.434 308.637C421.642 316.073 424.022 323.363 424.573 330.505C425.241 337.584 424.192 344.303 421.427 350.662C418.779 356.958 414.814 363.209 409.532 369.415C404.251 375.621 397.791 381.479 390.153 386.989C382.579 392.616 374.136 398.183 364.824 403.69C355.576 409.314 345.603 414.724 334.904 419.92C330.382 422.221 325.738 422.767 320.972 421.555C316.323 420.281 312.528 417.784 309.587 414.064C306.529 410.408 304.233 406.338 302.7 401.855C301.167 397.372 301.158 392.896 302.675 388.429C304.192 383.962 307.179 380.519 311.638 378.1L303.664 363.064C297.904 365.885 292.375 365.923 287.077 363.178C281.662 360.497 277.665 356.515 275.087 351.232C272.456 346.129 271.542 340.551 272.345 334.496C273.201 328.261 276.355 323.589 281.806 320.481ZM342.527 343.577L349.254 356.328C360.433 349.505 366.765 343.413 368.25 338.051C362.407 336.817 353.833 338.659 342.527 343.577Z"
+						fill="currentColor"
+						id="element-5"
+					/>
+					<path
+						d="M342.387 216.119C348.722 230.899 354.173 245.685 358.738 260.475C360.448 265.801 359.993 270.584 357.373 274.824C354.794 279.176 351.325 282.143 346.965 283.725C342.87 285.338 338.387 285.383 333.516 283.861C328.799 282.41 325.285 279.068 322.975 273.833C321.342 269.745 318.4 261.767 314.152 249.898L308.953 251.784C309.118 252.231 309.55 253.402 310.249 255.299C311.101 257.267 311.651 258.586 311.898 259.256C313.461 263.496 313.547 267.513 312.157 271.307C310.92 275.172 308.693 278.068 305.474 279.995C302.408 281.993 299.039 283.342 295.368 284.042C291.809 284.701 288.264 284.026 284.735 282.018C281.359 280.08 278.91 277.047 277.388 272.918L274.303 264.549L267.763 266.922C271.942 276.539 275.057 284.645 277.107 291.238C278.929 296.524 278.403 301.459 275.53 306.044C272.728 310.477 269.126 313.428 264.725 314.899C260.03 316.603 255.262 316.562 250.421 314.777C245.621 313.103 242.148 309.872 240.003 305.083C232.962 289.42 227.235 274.229 222.823 259.51C221.431 254.702 221.668 250.187 223.534 245.968C225.513 241.707 228.809 238.613 233.422 236.686C265.337 223.206 294.047 212.724 319.553 205.238C324.331 203.758 328.805 204.032 332.975 206.061C337.298 208.161 340.435 211.514 342.387 216.119Z"
+						fill="currentColor"
+						id="element-4"
+					/>
+					<path
+						d="M158.873 320.769C151.368 324.366 148.774 328.127 151.089 332.054C151.916 332.502 152.461 332.975 152.723 333.474C153.061 333.835 153.794 333.965 154.922 333.863C155.986 333.549 156.838 333.298 157.477 333.109C157.978 332.846 158.943 332.389 160.371 331.737C161.737 330.873 162.815 330.21 163.604 329.746C164.468 329.146 165.69 328.382 167.269 327.455C168.785 326.317 170.044 325.484 171.046 324.958C185.28 315.92 198.146 310.685 209.646 309.252C220.87 307.671 232.205 310.782 243.651 318.585C252.842 324.633 259.121 332.578 262.486 342.418C265.927 352.122 266.405 362.18 263.92 372.594C261.736 382.458 257.311 392.177 250.643 401.75C244.188 411.26 236.537 418.875 227.691 424.596C216.615 431.781 206.406 432.487 197.064 426.714C189.726 421.848 185.614 415.166 184.728 406.669C183.705 396.137 188.137 388.203 198.022 382.867L198.774 382.473C209.486 377.585 213.534 372.472 210.918 367.136C209.441 365.266 207.524 364.852 205.169 365.892C202.889 366.795 198.942 369.112 193.329 372.842C180.761 382.426 169.103 388.227 158.355 390.245C148.108 391.999 136.641 389.618 123.955 383.103C112.997 377.345 105.497 369.185 101.456 358.621C97.3518 347.846 96.5108 337.145 98.9328 326.519C101.217 315.819 105.869 305.688 112.887 296.127C119.906 286.566 128.301 279.71 138.073 275.56C143.924 273.028 149.492 272.48 154.778 273.918C160.001 275.144 164.014 277.763 166.818 281.777C169.485 285.715 171.393 290.224 172.543 295.301C173.556 300.304 172.783 305.142 170.226 309.814C167.744 314.35 163.96 318.001 158.873 320.769Z"
+						fill="currentColor"
+						id="element-3"
+					/>
+					<path
+						d="M203.174 97.0459L203.014 97.1057C197.977 98.982 192.953 98.7794 187.94 96.4981C182.927 94.2168 179.453 90.5077 177.519 85.3709C175.626 80.3411 175.836 75.3818 178.15 70.4929C180.423 65.4971 184.078 62.0611 189.115 60.1849L189.275 60.125C194.312 58.2488 199.336 58.4513 204.349 60.7326C209.322 62.9069 212.755 66.509 214.649 71.5388C216.582 76.6756 216.413 81.7419 214.139 86.7378C211.866 91.7336 208.211 95.1696 203.174 97.0459ZM230.198 110.408C231.42 113.979 233.811 120.654 237.37 130.433C240.995 140.064 243.695 147.234 245.467 151.943C247.24 156.652 249.201 162.023 251.35 168.055C253.566 173.941 255.345 178.831 256.688 182.723C258.139 186.576 259.327 189.733 260.254 192.194C262.188 197.331 261.716 202.083 258.839 206.449C255.922 210.709 252.159 213.697 247.552 215.413C243.051 217.09 238.241 217.295 233.122 216.03C228.217 214.684 224.71 211.537 222.603 206.587C213.553 184.821 203.393 157.184 192.123 123.677C190.444 118.567 191.03 113.956 193.88 109.843C196.864 105.437 200.68 102.429 205.328 100.819C210.15 99.0231 215 98.9246 219.879 100.524C224.824 101.976 228.264 105.271 230.198 110.408Z"
+						fill="currentColor"
+						id="element-2"
+					/>
+					<path
+						d="M330.615 53.3463C372.154 77.629 404.723 97.5682 428.319 113.164C434.425 117.012 437.707 122.757 438.163 130.401C438.698 137.915 436.627 144.652 431.949 150.611C427.53 156.725 421.547 160.056 414 160.605C409.245 160.903 400.189 160.895 386.833 160.581C374.484 160.347 366.447 160.688 362.723 161.606C364.807 163.386 369.422 165.636 376.567 168.354C383.582 170.995 388.636 173.245 391.728 175.104C397.912 178.824 401.338 184.042 402.006 190.76C402.622 197.271 401.252 203.289 397.894 208.813C394.693 214.081 389.934 218.148 383.617 221.016C377.327 223.549 371.18 223.097 365.175 219.661C331.983 200.75 298.963 180.539 266.118 159.03C259.626 154.949 256.307 148.831 256.163 140.673C255.94 132.645 258.336 125.664 263.349 119.732C268.311 113.594 274.253 110.764 281.175 111.243C307.524 112.179 324.06 112.037 330.783 110.817C328.777 108.908 324.137 106.556 316.863 103.76C309.719 101.042 304.923 98.9469 302.475 97.4747C297.708 94.6075 294.651 90.6637 293.304 85.643C291.828 80.5449 292.096 75.618 294.107 70.8624C295.988 66.0293 298.708 61.6999 302.264 57.8741C305.692 53.9709 310.083 51.5237 315.435 50.5325C320.659 49.4638 325.719 50.4017 330.615 53.3463Z"
+						fill="currentColor"
+						id="element-1"
+					/>
+				</svg>
+
+				<!-- Plus Icon -->
+				<svg
+					width="36"
+					height="38"
+					viewBox="0 0 36 38"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M18.095 37.207C16.3723 37.207 15.2473 35.9062 15.2473 34.1836V21.8438H3.57544C1.85278 21.8438 0.552002 20.7188 0.552002 18.9961C0.552002 17.2734 1.85278 16.1484 3.57544 16.1484H15.2473V3.77344C15.2473 2.05078 16.3723 0.75 18.095 0.75C19.8176 0.75 20.9426 2.05078 20.9426 3.77344V16.1484H32.5793C34.302 16.1484 35.6028 17.2734 35.6028 18.9961C35.6028 20.7188 34.302 21.8438 32.5793 21.8438H20.9426V34.1836C20.9426 35.9062 19.8176 37.207 18.095 37.207Z"
+						fill="black"
+						fill-opacity="0.25"
+					/>
+				</svg>
+
+				<!-- Discord Logo -->
+				<svg
+					width="67"
+					height="66"
+					viewBox="0 0 67 66"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<g clip-path="url(#clip0_107_74)">
+						<path
+							d="M56.2415 11.6265C51.9692 9.62757 47.4011 8.17485 42.6252 7.34766C42.0387 8.40809 41.3534 9.83439 40.881 10.969C35.8041 10.2055 30.7739 10.2055 25.7904 10.969C25.3181 9.83439 24.6173 8.40809 24.0255 7.34766C19.2445 8.17485 14.6711 9.6329 10.3988 11.6371C1.78152 24.6589 -0.554479 37.3572 0.613523 49.8753C6.32894 54.1434 11.8679 56.7362 17.3133 58.4328C18.6578 56.5824 19.857 54.6153 20.89 52.5423C18.9226 51.7947 17.0382 50.8721 15.2577 49.8011C15.7301 49.4512 16.1921 49.0853 16.6385 48.7088C27.4983 53.7882 39.2977 53.7882 50.0278 48.7088C50.4794 49.0853 50.9414 49.4512 51.4086 49.8011C49.6228 50.8774 47.7333 51.7999 45.7659 52.5476C46.7989 54.6153 47.9929 56.5877 49.3425 58.4381C54.7932 56.7415 60.3373 54.1488 66.0527 49.8753C67.4232 35.3637 63.7116 22.7819 56.2415 11.6265ZM22.3695 42.1768C19.1095 42.1768 16.436 39.1334 16.436 35.4273C16.436 31.7212 19.0524 28.6725 22.3695 28.6725C25.6867 28.6725 28.36 31.7158 28.3029 35.4273C28.3081 39.1334 25.6867 42.1768 22.3695 42.1768ZM44.2968 42.1768C41.0368 42.1768 38.3633 39.1334 38.3633 35.4273C38.3633 31.7212 40.9796 28.6725 44.2968 28.6725C47.6139 28.6725 50.2873 31.7158 50.2303 35.4273C50.2303 39.1334 47.6139 42.1768 44.2968 42.1768Z"
+							fill="black"
+						/>
+					</g>
+					<defs>
+						<clipPath id="clip0_107_74">
+							<rect
+								width="66"
+								height="66"
+								fill="white"
+								transform="translate(0.333252)"
+							/>
+						</clipPath>
+					</defs>
+				</svg>
+			</div>
+			<div class="header-links">
+				<a href="#" class="header-link" onclick="openModal('tosModal')">
+					Terms of Service
+					<svg
+						width="12"
+						height="12"
+						viewBox="0 0 12 12"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M3.5 8.5L8.5 3.5M8.5 3.5H3.5M8.5 3.5V8.5"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</a>
+				<a href="#" class="header-link" onclick="openModal('privacyModal')">
+					Privacy Policy
+					<svg
+						width="12"
+						height="12"
+						viewBox="0 0 12 12"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M3.5 8.5L8.5 3.5M8.5 3.5H3.5M8.5 3.5V8.5"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</a>
+			</div>
+		</header>
+
+		<main>
+			<section>
+				<img
+					class="trusted"
+					src="https://kaeru-redirect-cdn.onrender.com/trusted.webp"
+					alt="Kaeru is a trusted app on Discord and has been verified by Discord. 250+ Individual Discord users trust Kaeru with their data."
+				/>
+
+				<div>
+					<img
+						class="kaeru_mascot"
+						src="https://kaeru-redirect-cdn.onrender.com/kaeru.webp"
+						alt="Kaeru"
+					/>
+
+					<div role="text">
+						<h1><span>Kaeru</span> + Your Account</h1>
+						<p>You have linked your account with Kaeru.</p>
+					</div>
+				</div>
+
+				<img
+					class="kaeru_sticker"
+					src="https://kaeru-redirect-cdn.onrender.com/kaeru_sticker.webp"
+					alt="Kaeru Sticker"
+				/>
+			</section>
+
+			<button
+				onclick="
+					window.location.href =
+						'https://discord.com/oauth2/authorize?client_id=736561919292473454'
+				"
+			>
+				<svg
+					class="verified_icon"
+					width="23"
+					height="23"
+					viewBox="0 0 23 23"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<g clip-path="url(#clip0_107_83)">
+						<!-- Background seal (will rotate) -->
+						<path
+							class="verified_background"
+							d="M13.1786 1.12908L14.6632 2.60564C14.8071 2.74334 14.9368 2.79041 15.1278 2.79041H17.2144C19.0196 2.79041 19.8608 3.64412 19.8608 5.43513V7.52967C19.8608 7.71443 19.9124 7.84861 20.0519 7.98631L21.5284 9.47088C22.7958 10.74 22.8038 11.9335 21.5284 13.2009L20.0519 14.6855C19.9159 14.8312 19.8608 14.9591 19.8608 15.1501V17.2367C19.8608 19.0419 19.0134 19.8831 17.2144 19.8831H15.1278C14.9368 19.8831 14.8089 19.9365 14.6632 20.0742L13.1786 21.5507C11.9112 22.8199 10.7159 22.8279 9.44857 21.5507L7.964 20.0742C7.82454 19.9365 7.69036 19.8831 7.50736 19.8831H5.41282C3.61556 19.8831 2.76634 19.0357 2.76634 17.2367V15.1501C2.76634 14.9591 2.71927 14.8312 2.58333 14.6855L1.10677 13.2009C-0.160611 11.9335 -0.168619 10.74 1.10677 9.47088L2.58333 7.98631C2.71927 7.85037 2.76634 7.71443 2.76634 7.52967V5.43513C2.76634 3.62635 3.6138 2.79041 5.41282 2.79041H7.50736C7.69036 2.79041 7.8263 2.74334 7.964 2.60564L9.44857 1.13084C10.7159 -0.140059 11.9077 -0.148068 13.1786 1.12908Z"
+							fill="#43140740"
+						/>
+						<!-- Checkmark (will not rotate) -->
+						<path
+							class="verified_checkmark"
+							d="M14.2343 7.49021L10.1962 13.9556L8.31575 11.5658C8.06282 11.2435 7.8304 11.1318 7.52884 11.1318C7.02513 11.1318 6.62884 11.5353 6.62884 12.0408C6.62884 12.2802 6.72025 12.5136 6.8931 12.737L9.28802 15.6482C9.55951 16.0023 9.86107 16.1538 10.23 16.1538C10.5937 16.1538 10.912 15.9747 11.1347 15.6411L15.7052 8.5156C15.8399 8.29919 15.9581 8.06052 15.9581 7.82712C15.9581 7.32341 15.5103 6.98123 15.0306 6.98123C14.723 6.98123 14.448 7.14881 14.2343 7.49021Z"
+							fill="white"
+						/>
+					</g>
+					<defs>
+						<clipPath id="clip0_107_83">
+							<rect
+								width="22.6936"
+								height="22.3425"
+								fill="white"
+								transform="translate(0.153229 0.174438)"
+							/>
+						</clipPath>
+					</defs>
+				</svg>
+
+				<span>Install Kaeru</span> <sub>FREE</sub>
+			</button>
+		</main>
+
+		<footer>
+			<div class="big-text">Kaeru</div>
+		</footer>
+
+		<!-- Terms of Service Modal -->
+		<div id="tosModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1>📑 Kaeru – Terms of Service (ToS)</h1>
+					<button class="modal-close" onclick="closeModal('tosModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<p class="muted">Last Updated: August 24, 2025</p>
+					<ol>
+						<li>
+							<strong>Acceptance of Terms</strong>
+							<p>
+								By using Kaeru ("the Bot"), you agree to these Terms of Service. If
+								you do not agree, you may not use the Bot.
+							</p>
+						</li>
+						<li>
+							<strong>Eligibility</strong>
+							<p>
+								You must comply with Discord's Terms of Service and Community
+								Guidelines. You must be at least 13 years old (or the minimum age
+								required in your country).
+							</p>
+						</li>
+						<li>
+							<strong>Use of the Bot</strong>
+							<p>
+								Kaeru provides moderation, ticketing, and AI-powered utility
+								features. You agree not to misuse the Bot, attempt to exploit
+								vulnerabilities, or use the Bot in violation of Discord's rules. The
+								Bot may restrict, block, or remove your access if you violate these
+								terms.
+							</p>
+						</li>
+						<li>
+							<strong>Disclaimer of Warranties</strong>
+							<p>
+								The Bot is provided "as is" without warranties of any kind. We are
+								not responsible for downtime, data loss, or unexpected behavior.
+							</p>
+						</li>
+						<li>
+							<strong>Limitation of Liability</strong>
+							<p>
+								We are not liable for any damages, losses, or consequences resulting
+								from your use of the Bot.
+							</p>
+						</li>
+						<li>
+							<strong>Termination</strong>
+							<p>
+								We may suspend or terminate access to the Bot at any time without
+								notice if we believe you are violating the Terms or harming the
+								service.
+							</p>
+						</li>
+						<li>
+							<strong>Changes to Terms</strong>
+							<p>
+								We may update these Terms from time to time. Continued use of the
+								Bot means acceptance of the updated Terms.
+							</p>
+						</li>
+					</ol>
+					<p class="muted">If you have questions, please contact our support.</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Privacy Policy Modal -->
+		<div id="privacyModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1>📑 Kaeru – Privacy Policy</h1>
+					<button class="modal-close" onclick="closeModal('privacyModal')">
+						&times;
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="muted">Last Updated: August 24, 2025</p>
+					<ol>
+						<li>
+							<strong>Information We Collect</strong>
+							<p>
+								Kaeru may collect and process the following data: Discord User Data
+								(User ID, Username, Avatar) Message Data (only when explicitly
+								required for moderation, ticketing, or AI processing) Server Data
+								(Guild ID, roles, channel IDs for configuration) We do not sell,
+								trade, or share your data with third parties.
+							</p>
+						</li>
+						<li>
+							<strong>How We Use the Data</strong>
+							<p>
+								To provide core functionalities (moderation, tickets, AI utilities)
+								To improve performance and security To comply with legal or Discord
+								requirements
+							</p>
+						</li>
+						<li>
+							<strong>Data Storage & Retention</strong>
+							<p>
+								Data is stored securely and only as long as necessary for features.
+								You may request deletion of your data via our support server or
+								contact.
+							</p>
+						</li>
+						<li>
+							<strong>Third-Party Services</strong>
+							<p>
+								Kaeru may use third-party APIs (e.g., Google Generative AI). Use of
+								these APIs is subject to their respective privacy policies.
+							</p>
+						</li>
+						<li>
+							<strong>User Rights</strong>
+							<p>
+								You can request access to or deletion of your stored data. You can
+								opt-out by removing Kaeru from your server.
+							</p>
+						</li>
+						<li>
+							<strong>Security</strong>
+							<p>
+								We implement reasonable measures to protect your data, but we cannot
+								guarantee 100% security.
+							</p>
+						</li>
+						<li>
+							<strong>Changes to this Policy</strong>
+							<p>
+								We may update this Privacy Policy from time to time. Continued use
+								of the Bot means acceptance of the updated Policy.
+							</p>
+						</li>
+					</ol>
+					<p class="muted">
+						If you have questions about privacy, please contact our support.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			function openModal(modalId) {
+				const modal = document.getElementById(modalId);
+				modal.classList.add("show");
+				document.body.style.overflow = "hidden";
+			}
+
+			function closeModal(modalId) {
+				const modal = document.getElementById(modalId);
+				modal.classList.remove("show");
+				document.body.style.overflow = "auto";
+			}
+
+			window.onclick = function (event) {
+				const modals = document.querySelectorAll(".modal");
+				modals.forEach((modal) => {
+					if (event.target === modal) {
+						modal.classList.remove("show");
+						document.body.style.overflow = "auto";
+					}
+				});
+			};
+
+			document.addEventListener("keydown", function (event) {
+				if (event.key === "Escape") {
+					const openModal = document.querySelector(".modal.show");
+					if (openModal) {
+						openModal.classList.remove("show");
+						document.body.style.overflow = "auto";
+					}
+				}
+			});
+		</script>
+	</body>
 </html>
