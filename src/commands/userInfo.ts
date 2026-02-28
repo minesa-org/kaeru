@@ -19,6 +19,14 @@ import { getEmoji } from "../utils/index.ts";
 const userInfo: InteractionCommand = {
 	data: new UserCommandBuilder()
 		.setName("User Information")
+        .setNameLocalizations({
+			tr: "Kullanıcı Bilgisi",
+			it: "Informazioni Utente",
+			ro: "Informații Utilizator",
+			el: "Πληροφορίες Χρήστη",
+			"pt-BR": "Informações do Usuário",
+			"zh-CN": "用户信息",
+		})
 		.setIntegrationTypes([
 			IntegrationType.UserInstall,
 			IntegrationType.GuildInstall,
