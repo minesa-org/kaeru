@@ -21,7 +21,7 @@ const sendCommand: InteractionCommand = {
 	data: new CommandBuilder()
 		.setName("send")
 		.setDescription("Send a message to the ticket system")
-		.setDefaultMemberPermissions(0x0000000000040000) // Manage Threads
+		.setDefaultMemberPermissions(MiniPermFlags.ManageThreads)
 		.setContexts([CommandContext.Guild, CommandContext.Bot])
 		.setIntegrationTypes([
 			IntegrationType.GuildInstall,
@@ -234,7 +234,7 @@ const sendCommand: InteractionCommand = {
 										components: [
 											{
 												type: 10,
-												content: `-# Sent from DMs ${getEmoji("timer")}`,
+												content: `-# Sent from DMs ${getEmoji("reply")}`,
 											},
 										],
 									},

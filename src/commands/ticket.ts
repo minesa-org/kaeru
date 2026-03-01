@@ -28,7 +28,7 @@ const ticketCommand: InteractionCommand = {
 		.setDescription("Manage the ticket system")
 		.setContexts([CommandContext.Guild])
 		.setIntegrationTypes([IntegrationType.GuildInstall])
-		.setDefaultMemberPermissions(0x0000000000000020) // Manage Guild
+		.setDefaultMemberPermissions(MiniPermFlags.ManageGuild) // Manage Guild
 		.addSubcommand((sub) =>
 			sub
 				.setName("setup")
