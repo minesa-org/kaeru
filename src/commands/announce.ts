@@ -6,40 +6,22 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	LabelBuilder,
-	ChannelType,
-	InteractionFlags,
-    MiniPermFlags,
+	FileUploadBuilder,
+	ModalRoleSelectMenuBuilder,
+	CommandContext,
+	IntegrationType,
 } from "@minesa-org/mini-interaction";
-import { db } from "../utils/database.ts";
-import { getEmoji, sendAlertMessage } from "../utils/index.ts";
+import { PermissionFlagsBits } from "discord-api-types/v10";
 
 const announce: InteractionCommand = {
 	data: new CommandBuilder()
 		.setName("announce")
 		.setDescription("Announce something to the server!")
-		.setDefaultMemberPermissions(MiniPermFlags.ManageGuild),
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setContexts([CommandContext.Guild])
+		.setIntegrationTypes([IntegrationType.GuildInstall]),
 
 	handler: async (interaction: CommandInteraction) => {
-		const user = interaction.user;
-		if (!user) return;
-
-		const guildId = interaction.guild_id;
-		if (!guildId) {
-			return sendAlertMessage({
-				interaction,
-				content: "This command can only be used within a server.",
-				type: "error",
-			});
-		}
-
-		const channelId = interaction.channel_id;
-		if (!channelId) return;
-
-		// Store selection data temporarily for the modal handler
-		await db.set(`announce_data:${user.id}`, {
-			channelId,
-		});
-
 		const modal = new ModalBuilder()
 			.setCustomId("announce-modal")
 			.setTitle("Create Announcement")
@@ -49,7 +31,7 @@ const announce: InteractionCommand = {
 					.setDescription("Heading for the announcement")
 					.setComponent(
 						new TextInputBuilder()
-							.setCustomId("title")
+							.setCustomId("announcement:title")
 							.setPlaceholder("Announcement")
 							.setStyle(TextInputStyle.Short)
 							.setMaxLength(100)
@@ -60,44 +42,42 @@ const announce: InteractionCommand = {
 					.setDescription("Message content. Use Markdown for formatting.")
 					.setComponent(
 						new TextInputBuilder()
-							.setCustomId("description")
+							.setCustomId("announcement:description")
 							.setPlaceholder("What is this announcement about?")
 							.setStyle(TextInputStyle.Paragraph)
 							.setMaxLength(4000)
 							.setRequired(true),
 					),
 				new LabelBuilder()
-					.setLabel("Banner (Optional URL)")
-					.setDescription("Direct URL to a banner image")
+					.setLabel("Banner")
+					.setDescription("Upload an attachment to set a banner for the post")
 					.setComponent(
-						new TextInputBuilder()
-							.setCustomId("banner_url")
-							.setPlaceholder("https://example.com/banner.png")
-							.setStyle(TextInputStyle.Short)
+						new FileUploadBuilder()
+							.setCustomId("announcement:attachment")
+							.setMaxValues(1)
 							.setRequired(false),
 					),
 				new LabelBuilder()
-					.setLabel("Role (Optional Mention)")
-					.setDescription("Role to mention (ID or @mention)")
+					.setLabel("Select Role")
+					.setDescription("Role to mention")
 					.setComponent(
-						new TextInputBuilder()
-							.setCustomId("role_input")
-							.setPlaceholder("1477221006660599808 or @Announcements")
-							.setStyle(TextInputStyle.Short)
-							.setRequired(false),
+						new ModalRoleSelectMenuBuilder()
+							.setCustomId("announcement:role")
+							.setPlaceholder("Select a role")
+							.setMinValues(0)
+							.setMaxValues(1),
 					),
 				new LabelBuilder()
 					.setLabel("Button (Optional)")
-					.setDescription("Format: url, label (e.g. https://google.com, Visit Site)")
+					.setDescription("Format: url, label (e.g. https://discord.gg/minesa, Join us!)")
 					.setComponent(
 						new TextInputBuilder()
-							.setCustomId("button")
+							.setCustomId("announcement:button")
 							.setPlaceholder("https://example.com, Visit site")
 							.setStyle(TextInputStyle.Short)
 							.setRequired(false),
 					),
 			);
-
 		return interaction.showModal(modal);
 	},
 };

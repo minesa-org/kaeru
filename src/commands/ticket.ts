@@ -12,9 +12,9 @@ import {
 	InteractionFlags,
 	ContainerBuilder,
 	TextDisplayBuilder,
-	AttachmentOptionBuilder,
 	FileUploadBuilder,
 } from "@minesa-org/mini-interaction";
+import { PermissionFlagsBits } from "discord-api-types/v10";
 import type {
 	CommandInteraction,
 	InteractionCommand,
@@ -28,7 +28,7 @@ const ticketCommand: InteractionCommand = {
 		.setDescription("Manage the ticket system")
 		.setContexts([CommandContext.Guild])
 		.setIntegrationTypes([IntegrationType.GuildInstall])
-		.setDefaultMemberPermissions(MiniPermFlags.ManageGuild) // Manage Guild
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild) // Manage Guild
 		.addSubcommand((sub) =>
 			sub
 				.setName("setup")

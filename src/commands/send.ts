@@ -9,6 +9,7 @@ import {
 	InteractionFlags,
 	TextDisplayBuilder,
 } from "@minesa-org/mini-interaction";
+import { PermissionFlagsBits } from "discord-api-types/v10";
 import type {
 	CommandInteraction,
 	InteractionCommand,
@@ -21,7 +22,7 @@ const sendCommand: InteractionCommand = {
 	data: new CommandBuilder()
 		.setName("send")
 		.setDescription("Send a message to the ticket system")
-		.setDefaultMemberPermissions(MiniPermFlags.ManageThreads)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.setContexts([CommandContext.Guild, CommandContext.Bot])
 		.setIntegrationTypes([
 			IntegrationType.GuildInstall,
