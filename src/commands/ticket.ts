@@ -110,7 +110,9 @@ const ticketCommand: InteractionCommand = {
 		}
 
 		if (subcommand === "details") {
-			await interaction.deferReply({ flags: InteractionFlags.Ephemeral });
+			await interaction.deferReply({
+				flags: [InteractionFlags.Ephemeral, InteractionFlags.IsComponentsV2],
+			});
 			const guildData = await db.get(`guild:${guild.id}`);
 
 			if (!guildData) {
