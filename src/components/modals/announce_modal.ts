@@ -19,15 +19,12 @@ const announceModal: ComponentCommand = {
 
 		await interaction.deferReply({ flags: InteractionFlags.Ephemeral });
 
-		// Retrieve stored data
-		const announceData = (await db.get(`announce_data:${userId}`)) as any;
-		if (!announceData) {
+		const channelId = interaction.getSelectMenuValues("announcement:channel")?.[0];
+		if (!channelId) {
 			return interaction.editReply({
-				content: `${getEmoji("error")} Could not find announcement data. Please try the command again.`,
+				content: `${getEmoji("error")} Please select a channel for the announcement.`,
 			});
 		}
-
-		const { channelId } = announceData;
 		// pull values from modal fields defined in announce.ts
 		const title = interaction.getTextFieldValue("announcement:title") || "Announcement";
 		const description = interaction.getTextFieldValue("announcement:description") || "";
@@ -57,8 +54,6 @@ const announceModal: ComponentCommand = {
 				queue.push(job);
 				// MiniDatabase expects a Record<string, unknown>, so cast the array
 				await db.set("announce_queue", queue as unknown as Record<string, unknown>);
-				// remove temporary data
-				await db.delete(`announce_data:${userId}`);
 			} catch (err) {
 				console.error('failed to enqueue announcement', err);
 			}

@@ -8,12 +8,11 @@ import {
 	LabelBuilder,
 	FileUploadBuilder,
 	ModalRoleSelectMenuBuilder,
+	ModalChannelSelectMenuBuilder,
 	CommandContext,
 	IntegrationType,
-	InteractionFlags,
 } from "@minesa-org/mini-interaction";
 import { PermissionFlagsBits } from "discord-api-types/v10";
-import { db } from "../utils/database.ts";
 import { getEmoji } from "../utils/index.ts";
 
 const announce: InteractionCommand = {
@@ -22,36 +21,33 @@ const announce: InteractionCommand = {
 		.setDescription("Announce something to the server!")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.setContexts([CommandContext.Guild])
-		.setIntegrationTypes([IntegrationType.GuildInstall])
-		.addChannelOption((option) =>
-			option
-				.setName("channel")
-				.setDescription("Channel where the announcement should be posted")
-				.setRequired(true),
-		),
+		.setIntegrationTypes([IntegrationType.GuildInstall]),
 
 	handler: async (interaction: CommandInteraction) => {
 		const user = interaction.user ?? interaction.member?.user;
 		const guildId = interaction.guild_id;
-		const channel = interaction.options.getChannel("channel", true);
 
-		if (!guildId || !user || !channel) {
+		if (!guildId || !user) {
 			await interaction.reply({
-				flags: InteractionFlags.Ephemeral,
 				content: `${getEmoji("error")} This command can only be used in a server with a valid channel.`,
 			});
 			return;
 		}
 
-		await db.set(`announce_data:${user.id}`, {
-			guildId,
-			channelId: channel.id,
-		});
-
 		const modal = new ModalBuilder()
 			.setCustomId("announce-modal")
 			.setTitle("Create Announcement")
 			.addComponents(
+				new LabelBuilder()
+					.setLabel("Channel")
+					.setDescription("Channel where the announcement will be posted")
+					.setComponent(
+						new ModalChannelSelectMenuBuilder()
+							.setCustomId("announcement:channel")
+							.setPlaceholder("Select a channel")
+							.setMinValues(1)
+							.setMaxValues(1),
+					),
 				new LabelBuilder()
 					.setLabel("Title")
 					.setDescription("Heading for the announcement")
