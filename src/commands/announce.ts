@@ -49,17 +49,6 @@ const announce: InteractionCommand = {
 							.setMaxValues(1),
 					),
 				new LabelBuilder()
-					.setLabel("Title")
-					.setDescription("Heading for the announcement")
-					.setComponent(
-						new TextInputBuilder()
-							.setCustomId("announcement:title")
-							.setPlaceholder("Announcement")
-							.setStyle(TextInputStyle.Short)
-							.setMaxLength(100)
-							.setRequired(false),
-					),
-				new LabelBuilder()
 					.setLabel("Description")
 					.setDescription("Message content. Use Markdown for formatting.")
 					.setComponent(

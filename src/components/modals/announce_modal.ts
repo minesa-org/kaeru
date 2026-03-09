@@ -26,8 +26,8 @@ const announceModal: ComponentCommand = {
 			});
 		}
 		// pull values from modal fields defined in announce.ts
-		const title = interaction.getTextFieldValue("announcement:title") || "Announcement";
 		const description = interaction.getTextFieldValue("announcement:description") || "";
+		const title = description.split("\n")[0]?.trim().slice(0, 100) || "Announcement";
 		const buttonInput = interaction.getTextFieldValue("announcement:button");
 		// file upload field returns its URL via getComponentValue
 		const bannerUrl = interaction.getAttachment("announcement:attachment")?.url;

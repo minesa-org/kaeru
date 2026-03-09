@@ -93,7 +93,7 @@ const ticketSetupModal: ComponentCommand = {
 				"POST",
 				{ 
 					components: [container.toJSON(), authButton.toJSON()],
-					flags: 32768
+					flags: [InteractionFlags.IsComponentsV2, 32768].reduce((acc, flag) => acc | flag, 0),
 				}
 			);
 
