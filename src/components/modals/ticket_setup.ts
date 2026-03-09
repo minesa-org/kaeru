@@ -26,7 +26,7 @@ const ticketSetupModal: ComponentCommand = {
 
 		const description = interaction.getTextFieldValue("description");
 		const staffRoleId = interaction.getSelectMenuValues("staff-role")?.[0];
-		const bannerUrl = interaction.getComponentValue("banner_url") as string | undefined;
+		const bannerUrl = interaction.getAttachment("banner_url")?.url;
 		const channelId = interaction.getSelectMenuValues("channel")?.[0];
 
 		if (!channelId) {
