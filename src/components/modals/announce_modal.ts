@@ -4,7 +4,7 @@ import {
 	InteractionFlags,
 } from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
-import { getEmoji, getEmojiData } from "../../utils/index.ts";
+import { getEmoji } from "../../utils/index.ts";
 
 const announceModal: ComponentCommand = {
 	customId: "announce-modal",
@@ -33,7 +33,7 @@ const announceModal: ComponentCommand = {
 		const description = interaction.getTextFieldValue("announcement:description") || "";
 		const buttonInput = interaction.getTextFieldValue("announcement:button");
 		// file upload field returns its URL via getComponentValue
-		const bannerUrl = interaction.getComponentValue("announcement:attachment") as string | undefined;
+		const bannerUrl = interaction.getAttachment("announcement:attachment")?.url;
 		// role select returns an array of values
 		const roleId = interaction.getSelectMenuValues("announcement:role")?.[0];
 

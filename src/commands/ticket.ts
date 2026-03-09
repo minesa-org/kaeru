@@ -8,7 +8,6 @@ import {
 	LabelBuilder,
 	ModalRoleSelectMenuBuilder,
 	ModalChannelSelectMenuBuilder,
-	ChannelType,
 	InteractionFlags,
 	ContainerBuilder,
 	TextDisplayBuilder,
@@ -28,7 +27,7 @@ const ticketCommand: InteractionCommand = {
 		.setDescription("Manage the ticket system")
 		.setContexts([CommandContext.Guild])
 		.setIntegrationTypes([IntegrationType.GuildInstall])
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild) // Manage Guild
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.addSubcommand((sub) =>
 			sub
 				.setName("setup")
@@ -58,7 +57,7 @@ const ticketCommand: InteractionCommand = {
 		const subcommand = interaction.options.getSubcommand();
 
 		if (subcommand === "setup") {
-			const guildData = (await db.get(`guild:${guild.id}`)) as any || {};
+			const guildData = ((await db.get(`guild:${guild.id}`)) as any) || {};
 
 			const modal = new ModalBuilder()
 				.setCustomId("ticket-setup-modal")
@@ -97,11 +96,13 @@ const ticketCommand: InteractionCommand = {
 								.setMaxValues(1),
 						),
 					new LabelBuilder()
-						.setLabel("Banner Image URL")
+						.setLabel("Banner Image")
 						.setDescription("Optional image displayed at the top")
 						.setComponent(
 							new FileUploadBuilder()
-								.setCustomId("banner_url").setMaxValues(1).setRequired(false)
+								.setCustomId("banner_url")
+								.setMaxValues(1)
+								.setRequired(false),
 						),
 				);
 
@@ -136,7 +137,7 @@ const ticketCommand: InteractionCommand = {
 
 		if (subcommand === "default") {
 			await interaction.deferReply({ flags: InteractionFlags.Ephemeral });
-			
+
 			const guildData = await db.get(`guild:${guild.id}`);
 			if (guildData) {
 				const resetData = {
