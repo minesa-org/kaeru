@@ -3,11 +3,9 @@ import {
 	CommandContext,
 	IntegrationType,
 	InteractionFlags,
+	MiniPermFlags,
 } from "@minesa-org/mini-interaction";
-import type {
-	CommandInteraction,
-	InteractionCommand,
-} from "@minesa-org/mini-interaction";
+import type { CommandInteraction, InteractionCommand } from "@minesa-org/mini-interaction";
 import { db } from "../utils/database.ts";
 import { fetchDiscord } from "../utils/discord.ts";
 import { getEmoji, sendAlertMessage } from "../utils/index.ts";
@@ -17,11 +15,8 @@ const closeCommand: InteractionCommand = {
 		.setName("close")
 		.setDescription("Close and archive the current ticket thread")
 		.setContexts([CommandContext.Guild, CommandContext.Bot])
-		.setIntegrationTypes([
-			IntegrationType.GuildInstall,
-			IntegrationType.UserInstall,
-		])
-		.setDefaultMemberPermissions(0x0000000000040000), // Manage Threads
+		.setIntegrationTypes([IntegrationType.GuildInstall, IntegrationType.UserInstall])
+		.setDefaultMemberPermissions(MiniPermFlags.ManageThreads),
 
 	handler: async (interaction: CommandInteraction) => {
 		const user = interaction.user ?? interaction.member?.user;
@@ -44,9 +39,7 @@ const closeCommand: InteractionCommand = {
 				const now = Date.now();
 
 				if (cooldownData && (cooldownData as any).expiresAt > now) {
-					const timestamp = Math.floor(
-						(cooldownData as any).expiresAt / 1000,
-					);
+					const timestamp = Math.floor((cooldownData as any).expiresAt / 1000);
 
 					return sendAlertMessage({
 						interaction,
@@ -68,9 +61,7 @@ const closeCommand: InteractionCommand = {
 					});
 				}
 
-				const ticketData = await db.get(
-					`ticket:${userTicketData.activeTicketId}`,
-				);
+				const ticketData = await db.get(`ticket:${userTicketData.activeTicketId}`);
 				if (!ticketData) {
 					return sendAlertMessage({
 						interaction,
@@ -90,7 +81,7 @@ const closeCommand: InteractionCommand = {
 						process.env.DISCORD_BOT_TOKEN!,
 						true,
 						"POST",
-						{ recipient_id: ticketData.userId }
+						{ recipient_id: ticketData.userId },
 					);
 
 					if (dmChannel?.id) {
@@ -99,7 +90,9 @@ const closeCommand: InteractionCommand = {
 							process.env.DISCORD_BOT_TOKEN!,
 							true,
 							"POST",
-							{ content: `-# **Warning:** Closing tickets too quickly will put you on a ${getEmoji("timer")} 30-minute cooldown before you can close another ticket.` }
+							{
+								content: `-# **Warning:** Closing tickets too quickly will put you on a ${getEmoji("timer")} 30-minute cooldown before you can close another ticket.`,
+							},
 						);
 					}
 				} catch (warnError) {
@@ -112,7 +105,9 @@ const closeCommand: InteractionCommand = {
 						process.env.DISCORD_BOT_TOKEN!,
 						true,
 						"POST",
-						{ content: `## ${getEmoji("ticket.archive.user")} Ticket Closed\n\n- **User:** ${ticketData.username}\n\n-# This ticket has been closed by the user.` }
+						{
+							content: `## ${getEmoji("ticket.archive.user")} Ticket Closed\n\n- **User:** ${ticketData.username}\n\n-# This ticket has been closed by the user.`,
+						},
 					);
 				} catch (messageError) {
 					console.error("Error sending archive message to thread:", messageError);
@@ -124,7 +119,7 @@ const closeCommand: InteractionCommand = {
 						process.env.DISCORD_BOT_TOKEN!,
 						true,
 						"PATCH",
-						{ locked: true, archived: true }
+						{ locked: true, archived: true },
 					);
 				} catch (archiveError) {
 					console.error("Error archiving thread:", archiveError);
@@ -169,7 +164,11 @@ const closeCommand: InteractionCommand = {
 			}
 		}
 
-		if (!channel || (channel.type !== 12 && channel.type !== 10 && channel.type !== 11) || !channel.name) {
+		if (
+			!channel ||
+			(channel.type !== 12 && channel.type !== 10 && channel.type !== 11) ||
+			!channel.name
+		) {
 			return sendAlertMessage({
 				interaction,
 				content: "This command can only be used in ticket threads.",
@@ -206,7 +205,9 @@ const closeCommand: InteractionCommand = {
 					process.env.DISCORD_BOT_TOKEN!,
 					true,
 					"POST",
-					{ content: `## ${getEmoji("ticket.archive.server")} Ticket Archived\n\n- **User:** ${ticketData.username}\n\n-# This ticket has been archived by staff.` }
+					{
+						content: `## ${getEmoji("ticket.archive.server")} Ticket Archived\n\n- **User:** ${ticketData.username}\n\n-# This ticket has been archived by staff.`,
+					},
 				);
 			} catch (messageError) {
 				console.error("Error sending archive message to thread:", messageError);
@@ -221,7 +222,7 @@ const closeCommand: InteractionCommand = {
 				process.env.DISCORD_BOT_TOKEN!,
 				true,
 				"PATCH",
-				{ locked: true, archived: true }
+				{ locked: true, archived: true },
 			);
 
 			const userKey = `user:${ticketData.userId}`;
@@ -239,7 +240,7 @@ const closeCommand: InteractionCommand = {
 					process.env.DISCORD_BOT_TOKEN!,
 					true,
 					"POST",
-					{ recipient_id: ticketData.userId }
+					{ recipient_id: ticketData.userId },
 				);
 
 				if (dmChannel?.id) {
@@ -271,7 +272,7 @@ const closeCommand: InteractionCommand = {
 								},
 							],
 							flags: 32768,
-						}
+						},
 					);
 				}
 			} catch (dmError) {

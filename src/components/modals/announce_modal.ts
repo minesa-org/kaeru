@@ -1,12 +1,12 @@
 import {
-	type ComponentCommand,
 	type ModalSubmitInteraction,
 	InteractionFlags,
+	type InteractionModal,
 } from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
 import { getEmoji } from "../../utils/index.ts";
 
-const announceModal: ComponentCommand = {
+const announceModal: InteractionModal = {
 	customId: "announce-modal",
 
 	handler: async (interaction: ModalSubmitInteraction) => {

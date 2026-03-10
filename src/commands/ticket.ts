@@ -12,8 +12,8 @@ import {
 	ContainerBuilder,
 	TextDisplayBuilder,
 	FileUploadBuilder,
+	MiniPermFlags,
 } from "@minesa-org/mini-interaction";
-import { PermissionFlagsBits } from "discord-api-types/v10";
 import type {
 	CommandInteraction,
 	InteractionCommand,
@@ -27,7 +27,7 @@ const ticketCommand: InteractionCommand = {
 		.setDescription("Manage the ticket system")
 		.setContexts([CommandContext.Guild])
 		.setIntegrationTypes([IntegrationType.GuildInstall])
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(MiniPermFlags.ManageGuild)
 		.addSubcommand((sub) =>
 			sub
 				.setName("setup")

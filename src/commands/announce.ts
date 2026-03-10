@@ -11,15 +11,15 @@ import {
 	ModalChannelSelectMenuBuilder,
 	CommandContext,
 	IntegrationType,
+	MiniPermFlags,
 } from "@minesa-org/mini-interaction";
-import { PermissionFlagsBits } from "discord-api-types/v10";
 import { getEmoji } from "../utils/index.ts";
 
 const announce: InteractionCommand = {
 	data: new CommandBuilder()
 		.setName("announce")
 		.setDescription("Announce something to the server!")
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(MiniPermFlags.ManageGuild)
 		.setContexts([CommandContext.Guild])
 		.setIntegrationTypes([IntegrationType.GuildInstall]),
 

@@ -1,6 +1,4 @@
 import {
-	type ComponentCommand,
-	type ModalSubmitInteraction,
 	InteractionFlags,
 	ContainerBuilder,
 	TextDisplayBuilder,
@@ -10,15 +8,15 @@ import {
 	GalleryBuilder,
 	GalleryItemBuilder,
 } from "@minesa-org/mini-interaction";
-import type { MessageActionRowComponent } from "@minesa-org/mini-interaction";
+import type { InteractionModal, MessageActionRowComponent } from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
 import { getEmoji } from "../../utils/index.ts";
 import { fetchDiscord } from "../../utils/discord.ts";
 
-const ticketSetupModal: ComponentCommand = {
+const ticketSetupModal: InteractionModal = {
 	customId: "ticket-setup-modal",
 
-	handler: async (interaction: ModalSubmitInteraction) => {
+	handler: async (interaction) => {
 		const guildId = interaction.guild_id;
 		if (!guildId) return;
 
@@ -41,7 +39,10 @@ const ticketSetupModal: ComponentCommand = {
 			const updatedData = {
 				...existingData,
 				guildId,
-				description: description || existingData.description || "Create a ticket to get support from our staff.",
+				description:
+					description ||
+					existingData.description ||
+					"Create a ticket to get support from our staff.",
 				pingRoleId: staffRoleId || existingData.pingRoleId,
 				bannerUrl: bannerUrl || existingData.bannerUrl,
 				ticketChannelId: channelId,
@@ -70,12 +71,11 @@ const ticketSetupModal: ComponentCommand = {
 
 			// Create Ticket button removed as per user request to use DM flow
 
-			const container = new ContainerBuilder()
-				.addComponent(
-					new TextDisplayBuilder().setContent(
-						`## ${getEmoji("sharedwithu")} Support Center\n${updatedData.description}\n\n- To start a conversation, please **Authorize the App** and then **direct message (DM)** me!`,
-					),
-				);
+			const container = new ContainerBuilder().addComponent(
+				new TextDisplayBuilder().setContent(
+					`## ${getEmoji("sharedwithu")} Support Center\n${updatedData.description}\n\n- To start a conversation, please **Authorize the App** and then **direct message (DM)** me!`,
+				),
+			);
 
 			if (updatedData.bannerUrl) {
 				container.addComponent(
@@ -91,10 +91,13 @@ const ticketSetupModal: ComponentCommand = {
 				process.env.DISCORD_BOT_TOKEN!,
 				true,
 				"POST",
-				{ 
+				{
 					components: [container.toJSON(), authButton.toJSON()],
-					flags: [InteractionFlags.IsComponentsV2, 32768].reduce((acc, flag) => acc | flag, 0),
-				}
+					flags: [InteractionFlags.IsComponentsV2, 32768].reduce(
+						(acc, flag) => acc | flag,
+						0,
+					),
+				},
 			);
 
 			return interaction.editReply({
