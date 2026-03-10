@@ -73,7 +73,7 @@ const announceModal: InteractionModal = {
 	customId: "announce-modal",
 
 	handler: async (interaction: ModalSubmitInteraction) => {
-		const user = interaction.user;
+		const user = interaction.user ?? interaction.member?.user;
 		if (!user) return;
 
 		const guildId = interaction.guild_id;
