@@ -25,6 +25,63 @@ const reactionPaths = [
 	"reactions.user.question",
 ] as const;
 
+async function createAnnouncementThread(
+	channelId: string,
+	messageId: string,
+	threadName: string,
+) {
+	let lastError: unknown;
+
+	for (const timeoutMs of [12000, 20000]) {
+		try {
+			return await fetchDiscord(
+				`/channels/${channelId}/messages/${messageId}/threads`,
+				process.env.DISCORD_BOT_TOKEN!,
+				true,
+				"POST",
+				{
+					name: threadName,
+					auto_archive_duration: 1440,
+				},
+				timeoutMs,
+			);
+		} catch (error) {
+			lastError = error;
+		}
+	}
+
+	throw lastError;
+}
+
+async function addAnnouncementReactions(
+	channelId: string,
+	messageId: string,
+) {
+	const failedReactionPaths: string[] = [];
+
+	for (const path of reactionPaths) {
+		try {
+			const emoji = getEmojiData(path);
+			await fetchDiscord(
+				`/channels/${channelId}/messages/${messageId}/reactions/${encodeURIComponent(`${emoji.name}:${emoji.id}`)}/@me`,
+				process.env.DISCORD_BOT_TOKEN!,
+				true,
+				"PUT",
+				null,
+				4000,
+			);
+		} catch {
+			failedReactionPaths.push(path);
+		}
+	}
+
+	if (failedReactionPaths.length > 0) {
+		console.warn(
+			`[Kaeru] Failed to add ${failedReactionPaths.length} reaction(s) to announcement message ${messageId}: ${failedReactionPaths.join(", ")}.`,
+		);
+	}
+}
+
 function splitAnnouncementDescription(rawDescription: string): {
 	title: string;
 	body: string;
@@ -178,50 +235,27 @@ const announceModal: InteractionModal = {
 				`[Kaeru] Sent announcement message ${message.id} to channel ${channelId}.`,
 			);
 
-			const reactionResults = await Promise.allSettled(
-				reactionPaths.map((path) => {
-					const emoji = getEmojiData(path);
-					return fetchDiscord(
-						`/channels/${channelId}/messages/${message.id}/reactions/${encodeURIComponent(`${emoji.name}:${emoji.id}`)}/@me`,
-						process.env.DISCORD_BOT_TOKEN!,
-						true,
-						"PUT",
-					);
-				}),
-			);
-
-			const failedReactionPaths = reactionResults.flatMap((result, index) =>
-				result.status === "rejected" ? [reactionPaths[index]] : [],
-			);
-
-			if (failedReactionPaths.length > 0) {
-				console.warn(
-					`[Kaeru] Failed to add ${failedReactionPaths.length} reaction(s) to announcement message ${message.id}: ${failedReactionPaths.join(", ")}.`,
-				);
-			}
-
 			const threadName =
 				title.length > 0 ? title.slice(0, 100) : `Announcement by ${user.username}`;
 
-			const thread = await fetchDiscord(
-				`/channels/${channelId}/messages/${message.id}/threads`,
-				process.env.DISCORD_BOT_TOKEN!,
-				true,
-				"POST",
-				{
-					name: threadName,
-					auto_archive_duration: 1440,
-				},
+			const thread = await createAnnouncementThread(
+				channelId,
+				message.id,
+				threadName,
 			);
 
 			console.info(
 				`[Kaeru] Created announcement thread ${thread.id} in channel ${channelId}.`,
 			);
 
-			return interaction.editReply({
+			const response = await interaction.editReply({
 				content:
 					`${getEmoji("seal")} Announcement sent to <#${channelId}> and thread <#${thread.id}> was created.`,
 			});
+
+			await addAnnouncementReactions(channelId, message.id);
+
+			return response;
 		} catch (error) {
 			console.error("Error in announce modal handler:", error);
 			return interaction.editReply({
