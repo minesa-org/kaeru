@@ -2,22 +2,42 @@ import {
 	ContainerBuilder,
 	GalleryBuilder,
 	GalleryItemBuilder,
-	InteractionFlags,
 	TextDisplayBuilder,
 } from "@minesa-org/mini-interaction";
+import { waitUntil } from "@vercel/functions";
 import type {
 	InteractionComponent,
+	MessageComponentInteraction,
 	StringSelectInteraction,
 } from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
 import { fetchDiscord } from "../../utils/discord.ts";
 import { getEmoji, getOrCreateWebhookUrl } from "../../utils/index.ts";
 
+function buildLoadingContainer() {
+	return new ContainerBuilder().addComponent(
+		new TextDisplayBuilder().setContent(
+			`## ${getEmoji("ticket.create")} Creating your ticket...\nThis can take a moment.`,
+		),
+	);
+}
+
+function buildErrorContainer(message: string) {
+	return new ContainerBuilder()
+		.addComponent(
+			new TextDisplayBuilder().setContent(
+				`## ${getEmoji("error")} Ticket creation failed`,
+			),
+		)
+		.addComponent(new TextDisplayBuilder().setContent(message));
+}
+
 const createMenuHandler: InteractionComponent = {
 	customId: "create:select_server",
 
 	handler: async (interaction) => {
-		const selectInteraction = interaction as StringSelectInteraction;
+		const selectInteraction = interaction as StringSelectInteraction &
+			MessageComponentInteraction;
 		const guildId = selectInteraction.data.values[0];
 		const user = selectInteraction.user ?? selectInteraction.member?.user;
 
@@ -27,7 +47,8 @@ const createMenuHandler: InteractionComponent = {
 			});
 		}
 
-		try {
+		const task = (async () => {
+			try {
 			const userTicketData = await db.get(`user:${user.id}`);
 			if (userTicketData?.activeTicketId) {
 				const existingTicket = await db.get(
@@ -47,10 +68,8 @@ const createMenuHandler: InteractionComponent = {
 							),
 						);
 
-					return selectInteraction.update({
+					return selectInteraction.editReply({
 						components: [container.toJSON()],
-						flags:
-							InteractionFlags.IsComponentsV2 | InteractionFlags.Ephemeral,
 					});
 				}
 			}
@@ -67,9 +86,12 @@ const createMenuHandler: InteractionComponent = {
 				guildData?.ticketChannelId ?? guild.system_channel_id;
 
 			if (!targetChannelId) {
-				return selectInteraction.update({
-					content:
-						"This server does not have a usable ticket channel configured.",
+				return selectInteraction.editReply({
+					components: [
+						buildErrorContainer(
+							"This server does not have a usable ticket channel configured.",
+						).toJSON(),
+					],
 				});
 			}
 
@@ -232,17 +254,26 @@ const createMenuHandler: InteractionComponent = {
 				);
 			}
 
-			return selectInteraction.update({
+			return selectInteraction.editReply({
 				components: [container.toJSON()],
-				flags: InteractionFlags.IsComponentsV2,
 			});
-		} catch (error) {
-			console.error("Error in create menu handler:", error);
-			return selectInteraction.update({
-				content:
-					"Failed to create thread. Check bot permissions in the selected server.",
-			});
-		}
+			} catch (error) {
+				console.error("Error in create menu handler:", error);
+				return selectInteraction.editReply({
+					components: [
+						buildErrorContainer(
+							"Failed to create thread. Check bot permissions in the selected server.",
+						).toJSON(),
+					],
+				});
+			}
+		})();
+
+		waitUntil(task);
+
+		return selectInteraction.update({
+			components: [buildLoadingContainer().toJSON()],
+		});
 	},
 };
 
