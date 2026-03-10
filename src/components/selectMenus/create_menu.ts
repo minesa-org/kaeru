@@ -157,6 +157,22 @@ const createMenuHandler: InteractionComponent = {
 									content:
 										"-# Please assist this user with their inquiry using `/send`.",
 								},
+								{
+									type: 10,
+									content:
+										"-# Use the button below if you want to invite the ticket creator into this thread.",
+								},
+							],
+						},
+						{
+							type: 1,
+							components: [
+								{
+									type: 2,
+									custom_id: "ticket:invite_creator",
+									style: 2,
+									label: "Invite Creator",
+								},
 							],
 						},
 					],
