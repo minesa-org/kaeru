@@ -25,14 +25,16 @@ const announceModal: InteractionModal = {
 				content: `${getEmoji("error")} Please select a channel for the announcement.`,
 			});
 		}
-		// pull values from modal fields defined in announce.ts
+
 		const description = interaction.getTextFieldValue("announcement:description") || "";
 		const title = description.split("\n")[0]?.trim().slice(0, 100) || "Announcement";
 		const buttonInput = interaction.getTextFieldValue("announcement:button");
-		// file upload field returns its URL via getComponentValue
-		const bannerUrl = interaction.getAttachment("announcement:attachment")?.url;
-		// role select returns an array of values
-		const roleId = interaction.getSelectMenuValues("announcement:role")?.[0];
+		const rawBannerUrl = interaction.getTextFieldValue("announcement:banner_url")?.trim();
+		const bannerUrl = rawBannerUrl && /^https?:\/\//i.test(rawBannerUrl)
+			? rawBannerUrl
+			: undefined;
+		const rawRole = interaction.getTextFieldValue("announcement:role")?.trim();
+		const roleId = rawRole?.match(/\d{17,20}/)?.[0];
 
 		// queue announcement job but don't block on database
 		const job = {
@@ -47,12 +49,11 @@ const announceModal: InteractionModal = {
 			username: user.username,
 		};
 
-		(async () => {
+		void (async () => {
 			try {
 				const existingQueue = (await db.get("announce_queue")) as any[] | null;
 				const queue = existingQueue && Array.isArray(existingQueue) ? existingQueue : [];
 				queue.push(job);
-				// MiniDatabase expects a Record<string, unknown>, so cast the array
 				await db.set("announce_queue", queue as unknown as Record<string, unknown>);
 			} catch (err) {
 				console.error('failed to enqueue announcement', err);

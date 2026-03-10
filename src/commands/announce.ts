@@ -6,8 +6,6 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	LabelBuilder,
-	FileUploadBuilder,
-	ModalRoleSelectMenuBuilder,
 	ModalChannelSelectMenuBuilder,
 	CommandContext,
 	IntegrationType,
@@ -60,23 +58,24 @@ const announce: InteractionCommand = {
 							.setRequired(true),
 					),
 				new LabelBuilder()
-					.setLabel("Banner")
-					.setDescription("Upload an attachment to set a banner for the post")
+					.setLabel("Banner URL (Optional)")
+					.setDescription("Paste an image URL to use as the banner")
 					.setComponent(
-						new FileUploadBuilder()
-							.setCustomId("announcement:attachment")
-							.setMaxValues(1)
+						new TextInputBuilder()
+							.setCustomId("announcement:banner_url")
+							.setPlaceholder("https://example.com/banner.png")
+							.setStyle(TextInputStyle.Short)
 							.setRequired(false),
 					),
 				new LabelBuilder()
-					.setLabel("Select Role")
-					.setDescription("Role to mention")
+					.setLabel("Role ID (Optional)")
+					.setDescription("Paste a role ID or mention like <@&123>")
 					.setComponent(
-						new ModalRoleSelectMenuBuilder()
+						new TextInputBuilder()
 							.setCustomId("announcement:role")
-							.setPlaceholder("Select a role")
-							.setMinValues(0)
-							.setMaxValues(1),
+							.setPlaceholder("123456789012345678")
+							.setStyle(TextInputStyle.Short)
+							.setRequired(false),
 					),
 				new LabelBuilder()
 					.setLabel("Button (Optional)")
