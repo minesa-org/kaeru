@@ -2,7 +2,11 @@ import {
 	ContainerBuilder,
 	TextDisplayBuilder,
 } from "@minesa-org/mini-interaction";
-import type { InteractionComponent, StringSelectInteraction } from "@minesa-org/mini-interaction";
+import type {
+	InteractionComponent,
+	MessageComponentInteraction,
+	StringSelectInteraction,
+} from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
 import { fetchDiscord } from "../../utils/discord.ts";
 import { getEmoji } from "../../utils/index.ts";
@@ -21,7 +25,8 @@ const createMenuHandler: InteractionComponent = {
 	customId: "create:select_server",
 
 	handler: async (interaction) => {
-		const selectInteraction = interaction as StringSelectInteraction;
+		const selectInteraction = interaction as StringSelectInteraction &
+			MessageComponentInteraction;
 		const guildId = selectInteraction.data.values[0];
 		const user = selectInteraction.user ?? selectInteraction.member?.user;
 
@@ -30,6 +35,8 @@ const createMenuHandler: InteractionComponent = {
 				content: "Could not resolve user or selected server.",
 			});
 		}
+
+		selectInteraction.deferUpdate();
 
 		try {
 			const [userTicketData, guildData, counterData] = await Promise.all([
@@ -56,7 +63,7 @@ const createMenuHandler: InteractionComponent = {
 								),
 							);
 
-					return selectInteraction.update({
+					return selectInteraction.editReply({
 						components: [container.toJSON()],
 					});
 				}
@@ -95,7 +102,7 @@ const createMenuHandler: InteractionComponent = {
 					: systemChannelId;
 
 			if (!targetChannelId) {
-				return selectInteraction.update({
+				return selectInteraction.editReply({
 					components: [
 						buildErrorContainer(
 							"This server does not have a usable ticket channel configured.",
@@ -210,12 +217,12 @@ const createMenuHandler: InteractionComponent = {
 					),
 				);
 
-			return selectInteraction.update({
+			return selectInteraction.editReply({
 				components: [container.toJSON()],
 			});
 		} catch (error) {
 			console.error("Error in create menu handler:", error);
-			return selectInteraction.update({
+			return selectInteraction.editReply({
 				components: [
 					buildErrorContainer(
 						"Failed to create thread. Check bot permissions in the selected server.",
