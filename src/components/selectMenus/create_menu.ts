@@ -9,6 +9,7 @@ import type {
 	MessageComponentInteraction,
 	StringSelectInteraction,
 } from "@minesa-org/mini-interaction";
+import { runInBackground } from "../../utils/background.ts";
 import { db } from "../../utils/database.ts";
 import { fetchDiscord } from "../../utils/discord.ts";
 import { getEmoji, getOrCreateWebhookUrl } from "../../utils/index.ts";
@@ -268,7 +269,7 @@ const createMenuHandler: InteractionComponent = {
 			}
 		})();
 
-		void task;
+		runInBackground(task);
 
 		return selectInteraction.update({
 			components: [buildLoadingContainer().toJSON()],

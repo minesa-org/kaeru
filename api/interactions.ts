@@ -1,4 +1,10 @@
+import { waitUntil } from "@vercel/functions";
 import { MiniInteraction } from "@minesa-org/mini-interaction";
+import { setBackgroundScheduler } from "../src/utils/background.js";
+
+setBackgroundScheduler((promise) => {
+	waitUntil(promise);
+});
 
 export const mini = new MiniInteraction({
 	commandsDirectory: "src/commands",
