@@ -4,7 +4,6 @@ import {
 	GalleryItemBuilder,
 	TextDisplayBuilder,
 } from "@minesa-org/mini-interaction";
-import { waitUntil } from "@vercel/functions";
 import type {
 	InteractionComponent,
 	MessageComponentInteraction,
@@ -269,7 +268,7 @@ const createMenuHandler: InteractionComponent = {
 			}
 		})();
 
-		waitUntil(task);
+		void task;
 
 		return selectInteraction.update({
 			components: [buildLoadingContainer().toJSON()],
