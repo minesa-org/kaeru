@@ -1,7 +1,17 @@
 import {
-	type ModalSubmitInteraction,
 	InteractionFlags,
-	type InteractionModal,
+	ContainerBuilder,
+	TextDisplayBuilder,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	GalleryBuilder,
+	GalleryItemBuilder,
+} from "@minesa-org/mini-interaction";
+import type {
+	InteractionModal,
+	MessageActionRowComponent,
+	ModalSubmitInteraction,
 } from "@minesa-org/mini-interaction";
 import { fetchDiscord } from "../../utils/discord.ts";
 import { getEmoji } from "../../utils/index.ts";
@@ -29,6 +39,36 @@ function parseLinkButton(input?: string): { label: string; url: string } | null 
 	}
 }
 
+function buildAnnouncementContainer(
+	title: string,
+	description: string,
+	roleId?: string,
+	bannerUrl?: string,
+) {
+	const container = new ContainerBuilder().addComponent(
+		new TextDisplayBuilder().setContent(
+			[
+				`## ${getEmoji("sharedwithu")} ${title}`,
+				roleId ? `-# <@&${roleId}>` : null,
+				"",
+				description,
+			]
+				.filter((line) => line !== null)
+				.join("\n"),
+		),
+	);
+
+	if (bannerUrl) {
+		container.addComponent(
+			new GalleryBuilder().addItem(
+				new GalleryItemBuilder().setMedia({ url: bannerUrl }),
+			),
+		);
+	}
+
+	return container;
+}
+
 const announceModal: InteractionModal = {
 	customId: "announce-modal",
 
@@ -39,86 +79,90 @@ const announceModal: InteractionModal = {
 		const guildId = interaction.guild_id;
 		if (!guildId) return;
 
+		await interaction.deferReply({ flags: InteractionFlags.Ephemeral });
+
 		const channelId = interaction.getSelectMenuValues("announcement:channel")?.[0];
 		if (!channelId) {
-			return interaction.reply({
+			return interaction.editReply({
 				content: `${getEmoji("error")} Please select a channel for the announcement.`,
-				flags: InteractionFlags.Ephemeral,
 			});
 		}
 
 		const description = interaction.getTextFieldValue("announcement:description")?.trim() || "";
 		const title = description.split("\n")[0]?.trim().slice(0, 100) || "Announcement";
-		const buttonInput = interaction.getTextFieldValue("announcement:button");
+		const buttonInput = interaction.getTextFieldValue("announcement:button")?.trim();
 		const rawBannerUrl = interaction.getTextFieldValue("announcement:banner_url")?.trim();
-		const bannerUrl = rawBannerUrl && /^https?:\/\//i.test(rawBannerUrl)
-			? rawBannerUrl
-			: undefined;
+		const bannerUrl =
+			rawBannerUrl && /^https?:\/\//i.test(rawBannerUrl) ? rawBannerUrl : undefined;
 		const rawRole = interaction.getTextFieldValue("announcement:role")?.trim();
 		const roleId = rawRole?.match(/\d{17,20}/)?.[0];
 
-		const button = parseLinkButton(buttonInput ?? undefined);
+		const button = parseLinkButton(buttonInput);
 		if (buttonInput && !button) {
-			return interaction.reply({
+			return interaction.editReply({
 				content:
 					`${getEmoji("error")} Invalid button format. Use \`https://example.com, Button label\`.`,
-				flags: InteractionFlags.Ephemeral,
 			});
 		}
 
-		interaction.deferReply({ flags: InteractionFlags.Ephemeral });
-
-		const messagePayload: Record<string, unknown> = {
-			content: roleId ? `<@&${roleId}>` : undefined,
-			embeds: [
-				{
-					title,
-					description,
-					image: bannerUrl ? { url: bannerUrl } : undefined,
-					footer: {
-						text: `Sent by ${user.username}`,
-					},
-				},
-			],
-			allowed_mentions: roleId ? { roles: [roleId] } : undefined,
-			components: button
-				? [
-						{
-							type: 1,
-							components: [
-								{
-									type: 2,
-									style: 5,
-									label: button.label,
-									url: button.url,
-								},
-							],
-						},
-				  ]
-				: undefined,
-		};
-
 		try {
-			await fetchDiscord(
+			const container = buildAnnouncementContainer(
+				title,
+				description,
+				roleId,
+				bannerUrl,
+			);
+
+			const components: unknown[] = [container.toJSON()];
+			if (button) {
+				const actionRow = new ActionRowBuilder<MessageActionRowComponent>().addComponents(
+					new ButtonBuilder()
+						.setLabel(button.label)
+						.setStyle(ButtonStyle.Link)
+						.setURL(button.url),
+				);
+				components.push(actionRow.toJSON());
+			}
+
+			const message = await fetchDiscord(
 				`/channels/${channelId}/messages`,
 				process.env.DISCORD_BOT_TOKEN!,
 				true,
 				"POST",
-				messagePayload,
-				5000,
+				{
+					components,
+					flags: [InteractionFlags.IsComponentsV2, 32768].reduce(
+						(acc, flag) => acc | flag,
+						0,
+					),
+				},
 			);
-		} catch (error) {
-			console.error("Failed to send announcement:", error);
+
+			const threadName =
+				title.length > 0 ? title.slice(0, 100) : `Announcement by ${user.username}`;
+
+			const thread = await fetchDiscord(
+				`/channels/${channelId}/messages/${message.id}/threads`,
+				process.env.DISCORD_BOT_TOKEN!,
+				true,
+				"POST",
+				{
+					name: threadName,
+					auto_archive_duration: 1440,
+				},
+			);
+
 			return interaction.editReply({
 				content:
-					`${getEmoji("error")} Failed to send the announcement. Check channel permissions and input values.`,
+					`${getEmoji("seal")} Announcement sent to <#${channelId}> and thread <#${thread.id}> was created.`,
+			});
+		} catch (error) {
+			console.error("Error in announce modal handler:", error);
+			return interaction.editReply({
+				content:
+					`${getEmoji("error")} Failed to send the announcement or create its public thread. Check my permissions in <#${channelId}>.`,
 			});
 		}
-
-		return interaction.editReply({
-			content:
-				`${getEmoji("seal")} Announcement sent to <#${channelId}> by ${user.username}.`,
-		});
 	},
 };
 
