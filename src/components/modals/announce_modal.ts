@@ -25,6 +25,31 @@ const reactionPaths = [
 	"reactions.user.question",
 ] as const;
 
+function splitAnnouncementDescription(rawDescription: string): {
+	title: string;
+	body: string;
+} {
+	const lines = rawDescription
+		.split("\n")
+		.map((line) => line.trimEnd());
+	const firstNonEmptyIndex = lines.findIndex((line) => line.trim().length > 0);
+
+	if (firstNonEmptyIndex === -1) {
+		return {
+			title: "Announcement",
+			body: "",
+		};
+	}
+
+	const title = lines[firstNonEmptyIndex].trim().slice(0, 100) || "Announcement";
+		const body = lines
+			.slice(firstNonEmptyIndex + 1)
+			.join("\n")
+			.trim();
+
+	return { title, body };
+}
+
 function parseLinkButton(input?: string): { label: string; url: string } | null {
 	if (!input) return null;
 
@@ -50,21 +75,22 @@ function parseLinkButton(input?: string): { label: string; url: string } | null 
 
 function buildAnnouncementContainer(
 	title: string,
-	description: string,
+	body: string,
 	roleId?: string,
 	bannerUrl?: string,
 ) {
+	const contentLines = [`## ${getEmoji("sharedwithu")} ${title}`];
+
+	if (roleId) {
+		contentLines.push(`-# <@&${roleId}>`);
+	}
+
+	if (body) {
+		contentLines.push("", body);
+	}
+
 	const container = new ContainerBuilder().addComponent(
-		new TextDisplayBuilder().setContent(
-			[
-				`## ${getEmoji("sharedwithu")} ${title}`,
-				roleId ? `-# <@&${roleId}>` : null,
-				"",
-				description,
-			]
-				.filter((line) => line !== null)
-				.join("\n"),
-		),
+		new TextDisplayBuilder().setContent(contentLines.join("\n")),
 	);
 
 	if (bannerUrl) {
@@ -102,7 +128,7 @@ const announceModal: InteractionModal = {
 		}
 
 		const description = interaction.getTextFieldValue("announcement:description")?.trim() || "";
-		const title = description.split("\n")[0]?.trim().slice(0, 100) || "Announcement";
+		const { title, body } = splitAnnouncementDescription(description);
 		const buttonInput = interaction.getTextFieldValue("announcement:button")?.trim();
 		const bannerUrl = interaction.getAttachment("announcement:banner")?.url;
 		const roleId = interaction.getSelectMenuValues("announcement:role")?.[0];
@@ -118,7 +144,7 @@ const announceModal: InteractionModal = {
 		try {
 			const container = buildAnnouncementContainer(
 				title,
-				description,
+				body,
 				roleId,
 				bannerUrl,
 			);
@@ -164,13 +190,13 @@ const announceModal: InteractionModal = {
 				}),
 			);
 
-			const failedReactionCount = reactionResults.filter(
-				(result) => result.status === "rejected",
-			).length;
+			const failedReactionPaths = reactionResults.flatMap((result, index) =>
+				result.status === "rejected" ? [reactionPaths[index]] : [],
+			);
 
-			if (failedReactionCount > 0) {
+			if (failedReactionPaths.length > 0) {
 				console.warn(
-					`[Kaeru] Failed to add ${failedReactionCount} reaction(s) to announcement message ${message.id}.`,
+					`[Kaeru] Failed to add ${failedReactionPaths.length} reaction(s) to announcement message ${message.id}: ${failedReactionPaths.join(", ")}.`,
 				);
 			}
 
