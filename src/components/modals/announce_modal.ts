@@ -14,7 +14,16 @@ import type {
 	ModalSubmitInteraction,
 } from "@minesa-org/mini-interaction";
 import { fetchDiscord } from "../../utils/discord.ts";
-import { getEmoji } from "../../utils/index.ts";
+import { getEmoji, getEmojiData } from "../../utils/index.ts";
+
+const reactionPaths = [
+	"reactions.user.heart",
+	"reactions.user.thumbsup",
+	"reactions.user.thumbsdown",
+	"reactions.user.haha",
+	"reactions.user.emphasize",
+	"reactions.user.question",
+] as const;
 
 function parseLinkButton(input?: string): { label: string; url: string } | null {
 	if (!input) return null;
@@ -142,6 +151,28 @@ const announceModal: InteractionModal = {
 			console.info(
 				`[Kaeru] Sent announcement message ${message.id} to channel ${channelId}.`,
 			);
+
+			const reactionResults = await Promise.allSettled(
+				reactionPaths.map((path) => {
+					const emoji = getEmojiData(path);
+					return fetchDiscord(
+						`/channels/${channelId}/messages/${message.id}/reactions/${encodeURIComponent(`${emoji.name}:${emoji.id}`)}/@me`,
+						process.env.DISCORD_BOT_TOKEN!,
+						true,
+						"PUT",
+					);
+				}),
+			);
+
+			const failedReactionCount = reactionResults.filter(
+				(result) => result.status === "rejected",
+			).length;
+
+			if (failedReactionCount > 0) {
+				console.warn(
+					`[Kaeru] Failed to add ${failedReactionCount} reaction(s) to announcement message ${message.id}.`,
+				);
+			}
 
 			const threadName =
 				title.length > 0 ? title.slice(0, 100) : `Announcement by ${user.username}`;
