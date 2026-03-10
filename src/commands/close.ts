@@ -71,7 +71,7 @@ const closeCommand: InteractionCommand = {
 				}
 
 				await interaction.deferReply({
-					flags: InteractionFlags.IsComponentsV2 | InteractionFlags.Ephemeral,
+					flags: InteractionFlags.Ephemeral,
 				});
 
 				// Warn user about cooldown policy via DM
@@ -196,7 +196,7 @@ const closeCommand: InteractionCommand = {
 			}
 
 			await interaction.deferReply({
-				flags: InteractionFlags.IsComponentsV2 | InteractionFlags.Ephemeral,
+				flags: InteractionFlags.Ephemeral,
 			});
 
 			try {
@@ -213,7 +213,7 @@ const closeCommand: InteractionCommand = {
 				console.error("Error sending archive message to thread:", messageError);
 			}
 
-			interaction.editReply({
+			await interaction.editReply({
 				content: `${getEmoji("ticket.archive.server")} **Archived the ticket.**`,
 			});
 
