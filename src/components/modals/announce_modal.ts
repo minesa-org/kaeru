@@ -79,6 +79,10 @@ const announceModal: InteractionModal = {
 		const guildId = interaction.guild_id;
 		if (!guildId) return;
 
+		console.info(
+			`[Kaeru] announce-modal submitted by ${user.id} in guild ${guildId}.`,
+		);
+
 		await interaction.deferReply({ flags: InteractionFlags.Ephemeral });
 
 		const channelId = interaction.getSelectMenuValues("announcement:channel")?.[0];
@@ -91,11 +95,8 @@ const announceModal: InteractionModal = {
 		const description = interaction.getTextFieldValue("announcement:description")?.trim() || "";
 		const title = description.split("\n")[0]?.trim().slice(0, 100) || "Announcement";
 		const buttonInput = interaction.getTextFieldValue("announcement:button")?.trim();
-		const rawBannerUrl = interaction.getTextFieldValue("announcement:banner_url")?.trim();
-		const bannerUrl =
-			rawBannerUrl && /^https?:\/\//i.test(rawBannerUrl) ? rawBannerUrl : undefined;
-		const rawRole = interaction.getTextFieldValue("announcement:role")?.trim();
-		const roleId = rawRole?.match(/\d{17,20}/)?.[0];
+		const bannerUrl = interaction.getAttachment("announcement:banner")?.url;
+		const roleId = interaction.getSelectMenuValues("announcement:role")?.[0];
 
 		const button = parseLinkButton(buttonInput);
 		if (buttonInput && !button) {
@@ -138,6 +139,10 @@ const announceModal: InteractionModal = {
 				},
 			);
 
+			console.info(
+				`[Kaeru] Sent announcement message ${message.id} to channel ${channelId}.`,
+			);
+
 			const threadName =
 				title.length > 0 ? title.slice(0, 100) : `Announcement by ${user.username}`;
 
@@ -150,6 +155,10 @@ const announceModal: InteractionModal = {
 					name: threadName,
 					auto_archive_duration: 1440,
 				},
+			);
+
+			console.info(
+				`[Kaeru] Created announcement thread ${thread.id} in channel ${channelId}.`,
 			);
 
 			return interaction.editReply({

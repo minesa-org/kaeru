@@ -7,9 +7,12 @@ import {
 	TextInputStyle,
 	LabelBuilder,
 	ModalChannelSelectMenuBuilder,
+	ModalRoleSelectMenuBuilder,
+	FileUploadBuilder,
 	CommandContext,
 	IntegrationType,
 	MiniPermFlags,
+	ChannelType,
 } from "@minesa-org/mini-interaction";
 import { getEmoji } from "../utils/index.ts";
 
@@ -44,7 +47,11 @@ const announce: InteractionCommand = {
 							.setCustomId("announcement:channel")
 							.setPlaceholder("Select a channel")
 							.setMinValues(1)
-							.setMaxValues(1),
+							.setMaxValues(1)
+							.setChannelTypes([
+								ChannelType.GuildText,
+								ChannelType.GuildAnnouncement,
+							]),
 					),
 				new LabelBuilder()
 					.setLabel("Description")
@@ -58,23 +65,22 @@ const announce: InteractionCommand = {
 							.setRequired(true),
 					),
 				new LabelBuilder()
-					.setLabel("Banner URL (Optional)")
-					.setDescription("Paste an image URL to use as the banner")
+					.setLabel("Role (Optional)")
+					.setDescription("Role to mention in the announcement")
 					.setComponent(
-						new TextInputBuilder()
-							.setCustomId("announcement:banner_url")
-							.setPlaceholder("https://example.com/banner.png")
-							.setStyle(TextInputStyle.Short)
-							.setRequired(false),
+						new ModalRoleSelectMenuBuilder()
+							.setCustomId("announcement:role")
+							.setPlaceholder("Select a role")
+							.setMinValues(1)
+							.setMaxValues(1),
 					),
 				new LabelBuilder()
-					.setLabel("Role ID (Optional)")
-					.setDescription("Paste a role ID or mention like <@&123>")
+					.setLabel("Banner Image (Optional)")
+					.setDescription("Upload a banner image for the announcement")
 					.setComponent(
-						new TextInputBuilder()
-							.setCustomId("announcement:role")
-							.setPlaceholder("123456789012345678")
-							.setStyle(TextInputStyle.Short)
+						new FileUploadBuilder()
+							.setCustomId("announcement:banner")
+							.setMaxValues(1)
 							.setRequired(false),
 					),
 				new LabelBuilder()
