@@ -1,5 +1,6 @@
 import {
 	InteractionFlags,
+	MessageFlags,
 	ContainerBuilder,
 	TextDisplayBuilder,
 	ActionRowBuilder,
@@ -11,7 +12,7 @@ import {
 import type { InteractionModal, MessageActionRowComponent } from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
 import { getEmoji } from "../../utils/index.ts";
-import { fetchDiscord } from "../../utils/discord.ts";
+import { getDiscordRestClient } from "../../utils/rest.ts";
 
 const ticketSetupModal: InteractionModal = {
 	customId: "ticket-setup-modal",
@@ -85,20 +86,13 @@ const ticketSetupModal: InteractionModal = {
 				);
 			}
 
-			// Send to target channel (Include auth button as a separate component)
-			await fetchDiscord(
-				`/channels/${channelId}/messages`,
-				process.env.DISCORD_BOT_TOKEN!,
-				true,
-				"POST",
-				{
-					components: [container.toJSON(), authButton.toJSON()],
-					flags: [InteractionFlags.IsComponentsV2, 32768].reduce(
-						(acc, flag) => acc | flag,
-						0,
-					),
-				},
-			);
+			const rest = getDiscordRestClient();
+
+			await rest.send({
+				channelId,
+				components: [container, authButton],
+				flags: MessageFlags.IsComponentsV2,
+			});
 
 			return interaction.editReply({
 				content: `${getEmoji("seal")} Ticket system has been configured and the creation message was sent to <#${channelId}>.`,

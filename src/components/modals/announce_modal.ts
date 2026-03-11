@@ -1,5 +1,6 @@
 import {
 	InteractionFlags,
+	MessageFlags,
 	ContainerBuilder,
 	TextDisplayBuilder,
 	ActionRowBuilder,
@@ -13,8 +14,8 @@ import type {
 	MessageActionRowComponent,
 	ModalSubmitInteraction,
 } from "@minesa-org/mini-interaction";
-import { fetchDiscord } from "../../utils/discord.ts";
 import { getEmoji, getEmojiData } from "../../utils/index.ts";
+import { getDiscordRestClient } from "../../utils/rest.ts";
 
 const reactionPaths = [
 	"reactions.user.heart",
@@ -25,51 +26,18 @@ const reactionPaths = [
 	"reactions.user.question",
 ] as const;
 
-async function createAnnouncementThread(
-	channelId: string,
-	messageId: string,
-	threadName: string,
-) {
-	let lastError: unknown;
-
-	for (const timeoutMs of [12000, 20000]) {
-		try {
-			return await fetchDiscord(
-				`/channels/${channelId}/messages/${messageId}/threads`,
-				process.env.DISCORD_BOT_TOKEN!,
-				true,
-				"POST",
-				{
-					name: threadName,
-					auto_archive_duration: 1440,
-				},
-				timeoutMs,
-			);
-		} catch (error) {
-			lastError = error;
-		}
-	}
-
-	throw lastError;
-}
-
 async function addAnnouncementReactions(
-	channelId: string,
-	messageId: string,
+	sentMessage: { react: (reaction: string | { name: string; id: string }) => Promise<unknown>; id: string },
 ) {
 	const failedReactionPaths: string[] = [];
 
 	for (const path of reactionPaths) {
 		try {
 			const emoji = getEmojiData(path);
-			await fetchDiscord(
-				`/channels/${channelId}/messages/${messageId}/reactions/${encodeURIComponent(`${emoji.name}:${emoji.id}`)}/@me`,
-				process.env.DISCORD_BOT_TOKEN!,
-				true,
-				"PUT",
-				null,
-				4000,
-			);
+			await sentMessage.react({
+				name: emoji.name,
+				id: emoji.id,
+			});
 		} catch {
 			failedReactionPaths.push(path);
 		}
@@ -77,7 +45,7 @@ async function addAnnouncementReactions(
 
 	if (failedReactionPaths.length > 0) {
 		console.warn(
-			`[Kaeru] Failed to add ${failedReactionPaths.length} reaction(s) to announcement message ${messageId}: ${failedReactionPaths.join(", ")}.`,
+			`[Kaeru] Failed to add ${failedReactionPaths.length} reaction(s) to announcement message ${sentMessage.id}: ${failedReactionPaths.join(", ")}.`,
 		);
 	}
 }
@@ -199,6 +167,7 @@ const announceModal: InteractionModal = {
 		}
 
 		try {
+			const rest = getDiscordRestClient();
 			const container = buildAnnouncementContainer(
 				title,
 				body,
@@ -206,7 +175,7 @@ const announceModal: InteractionModal = {
 				bannerUrl,
 			);
 
-			const components: unknown[] = [container.toJSON()];
+			const components = [container];
 			if (button) {
 				const actionRow = new ActionRowBuilder<MessageActionRowComponent>().addComponents(
 					new ButtonBuilder()
@@ -214,35 +183,35 @@ const announceModal: InteractionModal = {
 						.setStyle(ButtonStyle.Link)
 						.setURL(button.url),
 				);
-				components.push(actionRow.toJSON());
+				return await sendAnnouncementWithButton({
+					interaction,
+					rest,
+					channelId,
+					container,
+					actionRow,
+					title,
+					user,
+				});
 			}
 
-			const message = await fetchDiscord(
-				`/channels/${channelId}/messages`,
-				process.env.DISCORD_BOT_TOKEN!,
-				true,
-				"POST",
-				{
-					components,
-					flags: [InteractionFlags.IsComponentsV2, 32768].reduce(
-						(acc, flag) => acc | flag,
-						0,
-					),
-				},
-			);
+			const sentMessage = await rest.send({
+				channelId,
+				components,
+				flags: MessageFlags.IsComponentsV2,
+			});
 
 			console.info(
-				`[Kaeru] Sent announcement message ${message.id} to channel ${channelId}.`,
+				`[Kaeru] Sent announcement message ${sentMessage.id} to channel ${channelId}.`,
 			);
 
 			const threadName =
 				title.length > 0 ? title.slice(0, 100) : `Announcement by ${user.username}`;
 
-			const thread = await createAnnouncementThread(
-				channelId,
-				message.id,
-				threadName,
-			);
+			const thread = await sentMessage.startThread({
+				name: threadName,
+				autoArchiveDuration: 1440,
+				reason: `${user.username} created an announcement thread`,
+			});
 
 			console.info(
 				`[Kaeru] Created announcement thread ${thread.id} in channel ${channelId}.`,
@@ -253,7 +222,7 @@ const announceModal: InteractionModal = {
 					`${getEmoji("seal")} Announcement sent to <#${channelId}> and thread <#${thread.id}> was created.`,
 			});
 
-			await addAnnouncementReactions(channelId, message.id);
+			await addAnnouncementReactions(sentMessage);
 
 			return response;
 		} catch (error) {
@@ -267,3 +236,53 @@ const announceModal: InteractionModal = {
 };
 
 export default announceModal;
+
+async function sendAnnouncementWithButton({
+	interaction,
+	rest,
+	channelId,
+	container,
+	actionRow,
+	title,
+	user,
+}: {
+	interaction: ModalSubmitInteraction;
+	rest: ReturnType<typeof getDiscordRestClient>;
+	channelId: string;
+	container: ContainerBuilder;
+	actionRow: ActionRowBuilder<MessageActionRowComponent>;
+	title: string;
+	user: { username: string };
+}) {
+	const sentMessage = await rest.send({
+		channelId,
+		components: [container, actionRow],
+		flags: MessageFlags.IsComponentsV2,
+	});
+
+	console.info(
+		`[Kaeru] Sent announcement message ${sentMessage.id} to channel ${channelId}.`,
+	);
+
+	const threadName =
+		title.length > 0 ? title.slice(0, 100) : `Announcement by ${user.username}`;
+
+	const thread = await sentMessage.startThread({
+		name: threadName,
+		autoArchiveDuration: 1440,
+		reason: `${user.username} created an announcement thread`,
+	});
+
+	console.info(
+		`[Kaeru] Created announcement thread ${thread.id} in channel ${channelId}.`,
+	);
+
+	const response = await interaction.editReply({
+		content:
+			`${getEmoji("seal")} Announcement sent to <#${channelId}> and thread <#${thread.id}> was created.`,
+	});
+
+	await addAnnouncementReactions(sentMessage);
+
+	return response;
+}
