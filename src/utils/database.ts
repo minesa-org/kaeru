@@ -1,4 +1,9 @@
 import { MiniDatabase } from '@minesa-org/mini-interaction'
+import {
+  getDiscordGithubUsername,
+  getGithubMetadataOrg,
+  isUserMemberOfGithubOrg
+} from './githubOrg.js'
 
 /**
  * Shared database instance for the application.
@@ -39,13 +44,41 @@ export async function setUserMiniAppStatus(userId: string) {
  * is_miniapp is always true.
  */
 export async function updateDiscordMetadata(userId: string, accessToken: string) {
-  // Optional persistence, safe even if repeated
   await setUserMiniAppStatus(userId)
+
+  const githubUsername = await getDiscordGithubUsername(accessToken)
+  let isGithubOrgMember = false
+
+  if (githubUsername) {
+    try {
+      isGithubOrgMember = await isUserMemberOfGithubOrg(githubUsername)
+    } catch (error) {
+      console.error('[updateDiscordMetadata] GitHub org membership check failed:', error)
+    }
+  }
+
+  const existing = await db.get(userId).catch(() => null)
+  const base =
+    existing && typeof existing === 'object'
+      ? (existing as Record<string, unknown>)
+      : {}
+
+  await db.set(userId, {
+    ...base,
+    userId,
+    is_miniapp: true,
+    githubUsername: githubUsername ?? null,
+    githubOrg: getGithubMetadataOrg(),
+    isGithubOrgMember,
+    lastUpdated: Date.now()
+  })
 
   const metadata = {
     platform_name: 'Mini-Interaction',
+    username: githubUsername ?? null,
     metadata: {
-      is_miniapp: 1
+      is_miniapp: 1,
+      github_org_member: isGithubOrgMember ? 1 : 0
     }
   }
 
