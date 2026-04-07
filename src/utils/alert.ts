@@ -1,11 +1,11 @@
 import {
 	ContainerBuilder,
 	InteractionFlags,
-	GalleryBuilder,
-	GalleryItemBuilder,
+	SectionBuilder,
 	SeparatorBuilder,
 	SeparatorSpacingSize,
 	TextDisplayBuilder,
+	ThumbnailBuilder,
 } from "@minesa-org/mini-interaction";
 import { emojis, getEmoji } from "./emojis.ts";
 import type { RecursiveKeyOf } from "./emojis.ts";
@@ -61,14 +61,14 @@ export function containerTemplate({
 	}
 
 	const textDisplay = new TextDisplayBuilder().setContent(lines.join("\n"));
-	container.addComponent(textDisplay);
-
 	if (thumbnail) {
 		container.addComponent(
-			new GalleryBuilder().addItem(
-				new GalleryItemBuilder().setMedia({ url: thumbnail } as any),
-			),
+			new SectionBuilder()
+				.addComponent(textDisplay)
+				.setAccessory(new ThumbnailBuilder().setMedia({ url: thumbnail })),
 		);
+	} else {
+		container.addComponent(textDisplay);
 	}
 
 	return container;
@@ -111,4 +111,3 @@ export async function sendAlertMessage({
 		});
 	}
 }
-
