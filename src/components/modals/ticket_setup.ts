@@ -12,7 +12,31 @@ import {
 import type { InteractionModal, MessageActionRowComponent } from "@minesa-org/mini-interaction";
 import { db } from "../../utils/database.ts";
 import { getEmoji } from "../../utils/index.ts";
-import { getDiscordRestClient } from "../../utils/rest.ts";
+
+function getAttachmentFilename(url: string, fallback = "ticket-banner.png") {
+	try {
+		const pathname = new URL(url).pathname;
+		const lastSegment = pathname.split("/").pop();
+		if (!lastSegment) return fallback;
+		return decodeURIComponent(lastSegment) || fallback;
+	} catch {
+		return fallback;
+	}
+}
+
+async function downloadAttachment(url: string) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(
+			`Failed to download attachment: ${response.status} ${response.statusText}`,
+		);
+	}
+
+	return {
+		bytes: await response.arrayBuffer(),
+		mimeType: response.headers.get("content-type") || "application/octet-stream",
+	};
+}
 
 const ticketSetupModal: InteractionModal = {
 	customId: "ticket-setup-modal",
@@ -29,7 +53,9 @@ const ticketSetupModal: InteractionModal = {
 			interaction.getSelectMenuValues("staff-ping-mode")?.[0] === "random"
 				? "random"
 				: "role";
-		const bannerUrl = interaction.getAttachment("banner_url")?.url;
+		const bannerAttachment = interaction.getAttachment("banner_url");
+		const bannerUrl = bannerAttachment?.url;
+		const bannerFilename = bannerUrl ? getAttachmentFilename(bannerUrl) : null;
 		const channelId = interaction.getSelectMenuValues("channel")?.[0];
 
 		if (!channelId) {
@@ -75,29 +101,81 @@ const ticketSetupModal: InteractionModal = {
 					.setURL(oauthUrl),
 			);
 
-			// Create Ticket button removed as per user request to use DM flow
-
 			const container = new ContainerBuilder().addComponent(
 				new TextDisplayBuilder().setContent(
 					`## ${getEmoji("sharedwithu")} Support Center\n${updatedData.description}\n\n- To start a conversation, please **Authorize the App** and then **direct message (DM)** me!`,
 				),
 			);
 
-			if (updatedData.bannerUrl) {
-				container.addComponent(
-					new GalleryBuilder().addItem(
-						new GalleryItemBuilder().setMedia({ url: updatedData.bannerUrl as string }),
-					),
-				);
+			let bannerUpload:
+				| {
+					bytes: ArrayBuffer;
+					mimeType: string;
+				}
+				| null = null;
+
+			if (bannerUrl && bannerFilename) {
+				try {
+					bannerUpload = await downloadAttachment(bannerUrl);
+					container.addComponent(
+						new GalleryBuilder().addItem(
+							new GalleryItemBuilder().setMedia({
+								url: `attachment://${bannerFilename}`,
+							}),
+						),
+					);
+				} catch (error) {
+					console.warn("[Kaeru] Failed to re-upload ticket banner attachment:", error);
+				}
 			}
 
-			const rest = getDiscordRestClient();
-
-			await rest.send({
-				channelId,
-				components: [container, authButton],
+			const payload = {
+				components: [container.toJSON(), authButton.toJSON()],
 				flags: MessageFlags.IsComponentsV2,
-			});
+				...(bannerUpload && bannerFilename
+					? {
+						attachments: [
+							{
+								id: 0,
+								filename: bannerFilename,
+								description: "Ticket banner",
+							},
+						],
+					}
+					: {}),
+			};
+
+			const response = bannerUpload && bannerFilename
+				? await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+					method: "POST",
+					headers: {
+						Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+					},
+					body: (() => {
+						const formData = new FormData();
+						formData.append("payload_json", JSON.stringify(payload));
+						formData.append(
+							"files[0]",
+							new Blob([bannerUpload.bytes], { type: bannerUpload.mimeType }),
+							bannerFilename,
+						);
+						return formData;
+					})(),
+				})
+				: await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+					method: "POST",
+					headers: {
+						Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(payload),
+				});
+
+			if (!response.ok) {
+				throw new Error(
+					`Discord API error: ${response.status} ${await response.text()}`,
+				);
+			}
 
 			return interaction.editReply({
 				content: `${getEmoji("seal")} Ticket system has been configured and the creation message was sent to <#${channelId}>.`,
