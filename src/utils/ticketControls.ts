@@ -8,7 +8,6 @@ import {
 	TextDisplayBuilder,
 } from "@minesa-org/mini-interaction";
 import type { MessageActionRowComponent } from "@minesa-org/mini-interaction";
-import { randomInt } from "node:crypto";
 import { db } from "./database.ts";
 import { fetchDiscord } from "./discord.ts";
 import { getEmoji, getEmojiData } from "./emojis.ts";
@@ -466,16 +465,18 @@ export async function getRandomStaffMember(guildId: string, staffRoleId: string)
 	const candidates = await getStoredStaffRoster(guildId, staffRoleId);
 
 	if (candidates.length === 0) {
-		await refreshStaffRoster(guildId, staffRoleId);
 		return null;
 	}
 
-	return candidates[randomInt(candidates.length)];
-}
+	const indexKey = `staff-index:${guildId}`;
+	const index = Number(await db.get(indexKey).catch(() => 0)) || 0;
+	const nextIndex = index % candidates.length;
+	const selected = candidates[nextIndex];
+	await db.set(indexKey, (nextIndex + 1) % candidates.length).catch((error) => {
+		console.warn("[Kaeru] Could not advance staff round-robin index:", error);
+	});
 
-export async function getStaffRoleMembers(guildId: string, staffRoleId: string) {
-	const candidates = await getStoredStaffRoster(guildId, staffRoleId);
-	return candidates;
+	return selected;
 }
 
 export async function assignRandomStaffMember({
@@ -491,7 +492,6 @@ export async function assignRandomStaffMember({
 		return null;
 	}
 
-	await refreshStaffRoster(guildId, staffRoleId);
 	const member = await getRandomStaffMember(guildId, staffRoleId);
 	const userId = member?.userId;
 
@@ -507,7 +507,7 @@ export async function assignRandomStaffMember({
 		claimedById: userId,
 		claimedByUsername: member.username ?? member.nick ?? "Assigned staff member",
 		claimedAt: Date.now(),
-		claimMode: "random",
+		claimMode: "round-robin",
 	};
 }
 
