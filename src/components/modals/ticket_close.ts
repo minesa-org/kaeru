@@ -1,8 +1,5 @@
 import { InteractionFlags } from "@minesa-org/mini-interaction";
-import type {
-	InteractionModal,
-	ModalSubmitInteraction,
-} from "@minesa-org/mini-interaction";
+import type { InteractionModal, ModalSubmitInteraction } from "@minesa-org/mini-interaction";
 import { getEmoji } from "../../utils/index.ts";
 import {
 	canUseTicketStaffControls,
@@ -18,8 +15,7 @@ const ticketCloseModal: InteractionModal = {
 	handler: async (interaction: ModalSubmitInteraction) => {
 		const threadId = (interaction as any).channel_id;
 		const user = getInteractionUser(interaction);
-		const closeReason =
-			interaction.getTextFieldValue("close-reason")?.trim() || "";
+		const closeReason = interaction.getTextFieldValue("close-reason")?.trim() || "";
 
 		await interaction.deferReply({
 			flags: [InteractionFlags.Ephemeral, InteractionFlags.IsComponentsV2],
@@ -54,13 +50,6 @@ const ticketCloseModal: InteractionModal = {
 				status: "closed_commented",
 				logEmoji: "ticket.bubble.close",
 				logText: "has __force closed__ this as completed",
-				lockThread: true,
-				comment: closeReason,
-				userMessage:
-					`## ${getEmoji("ticket.bubble.close")} Your ticket has been closed\n` +
-					(closeReason
-						? `Staff left this closing comment:\n>>> ${closeReason}`
-						: "Staff closed this ticket."),
 			});
 
 			return interaction.editReply({
