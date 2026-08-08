@@ -27,6 +27,80 @@ export const TICKET_STATUS_REOPEN = "ticket-menu-reopen";
 type TicketData = Record<string, any>;
 const MAX_ACTIVE_TICKETS_PER_USER = 3;
 
+function uniqueIds(ids: unknown[]) {
+	return [...new Set(ids.filter((id): id is string => typeof id === "string" && id.length > 0))];
+}
+
+function normalizeStaffMember(member: any) {
+	const userId = typeof member?.user?.id === "string" ? member.user.id : null;
+	if (!userId) return null;
+
+	return {
+		userId,
+		username: typeof member?.user?.username === "string" ? member.user.username : null,
+		nick: typeof member?.nick === "string" ? member.nick : null,
+		roles: Array.isArray(member?.roles) ? uniqueIds(member.roles) : [],
+	};
+}
+
+export async function refreshStaffRoster(guildId: string, staffRoleId: string) {
+	const members = await fetchDiscord(
+		`/guilds/${guildId}/members?limit=1000`,
+		process.env.DISCORD_BOT_TOKEN!,
+		true,
+		"GET",
+		null,
+		8000,
+	).catch((error) => {
+		console.warn("[Kaeru] Could not refresh guild members for ticket assignment:", error);
+		return [];
+	});
+
+	const staffMembers = Array.isArray(members)
+		? members
+			.map(normalizeStaffMember)
+			.filter(
+				(member): member is NonNullable<ReturnType<typeof normalizeStaffMember>> =>
+					Boolean(member) && member.roles.includes(staffRoleId) && member.userId !== null,
+			)
+		: [];
+
+	const roster = staffMembers.map((member) => ({
+		userId: member.userId,
+		username: member.username,
+		nick: member.nick,
+		snapshottedAt: Date.now(),
+	}));
+
+	await db.set(`staff-roster:${guildId}`, {
+		staffRoleId,
+		updatedAt: Date.now(),
+		memberIds: roster.map((member) => member.userId),
+		members: roster,
+	}).catch((error) => {
+		console.warn("[Kaeru] Could not save refreshed staff roster:", error);
+	});
+
+	return roster;
+}
+
+export async function getStoredStaffRoster(guildId: string, staffRoleId: string) {
+	const rosterData = await db.get(`staff-roster:${guildId}`).catch(() => null);
+	const storedRoleId = typeof rosterData?.staffRoleId === "string" ? rosterData.staffRoleId : null;
+	const members = Array.isArray(rosterData?.members) ? rosterData.members : [];
+
+	if (storedRoleId !== staffRoleId || members.length === 0) {
+		return refreshStaffRoster(guildId, staffRoleId);
+	}
+
+	return members
+		.map(normalizeStaffMember)
+		.filter(
+			(member): member is NonNullable<ReturnType<typeof normalizeStaffMember>> =>
+				Boolean(member) && member.roles.includes(staffRoleId),
+		);
+}
+
 export function buildTicketClaimButtonRow() {
 	return new ActionRowBuilder<MessageActionRowComponent>().addComponents(
 		new ButtonBuilder()
@@ -389,9 +463,10 @@ export async function removeThreadMember(threadId: string, userId: string) {
 }
 
 export async function getRandomStaffMember(guildId: string, staffRoleId: string) {
-	const candidates = await getStaffRoleMembers(guildId, staffRoleId);
+	const candidates = await getStoredStaffRoster(guildId, staffRoleId);
 
 	if (candidates.length === 0) {
+		await refreshStaffRoster(guildId, staffRoleId);
 		return null;
 	}
 
@@ -399,29 +474,8 @@ export async function getRandomStaffMember(guildId: string, staffRoleId: string)
 }
 
 export async function getStaffRoleMembers(guildId: string, staffRoleId: string) {
-	const members = await fetchDiscord(
-		`/guilds/${guildId}/members?limit=1000`,
-		process.env.DISCORD_BOT_TOKEN!,
-		true,
-		"GET",
-		null,
-		8000,
-	).catch((error) => {
-		console.warn("[Kaeru] Could not fetch guild members for ticket assignment:", error);
-		return [];
-	});
-
-	if (!Array.isArray(members)) {
-		return [];
-	}
-
-	return members.filter(
-		(member) =>
-			Array.isArray(member?.roles) &&
-			member.roles.includes(staffRoleId) &&
-			typeof member.user?.id === "string" &&
-			!member.user?.bot,
-	);
+	const candidates = await getStoredStaffRoster(guildId, staffRoleId);
+	return candidates;
 }
 
 export async function assignRandomStaffMember({
@@ -437,8 +491,9 @@ export async function assignRandomStaffMember({
 		return null;
 	}
 
+	await refreshStaffRoster(guildId, staffRoleId);
 	const member = await getRandomStaffMember(guildId, staffRoleId);
-	const userId = member?.user?.id;
+	const userId = member?.userId;
 
 	if (!userId) {
 		return null;
@@ -450,8 +505,7 @@ export async function assignRandomStaffMember({
 
 	return {
 		claimedById: userId,
-		claimedByUsername:
-			member.user?.username ?? member.nick ?? "Assigned staff member",
+		claimedByUsername: member.username ?? member.nick ?? "Assigned staff member",
 		claimedAt: Date.now(),
 		claimMode: "random",
 	};
@@ -514,14 +568,14 @@ export async function removeOtherStaffRoleMembersFromThread({
 		return;
 	}
 
-	const staffMembers = await getStaffRoleMembers(guildId, staffRoleId);
+	const staffMembers = await getStoredStaffRoster(guildId, staffRoleId);
 	await Promise.all(
 		staffMembers
-			.filter((member) => member.user?.id && member.user.id !== keepUserId)
+			.filter((member) => member.userId && member.userId !== keepUserId)
 			.map((member) =>
-				removeThreadMember(threadId, member.user.id).catch((error) => {
+				removeThreadMember(threadId, member.userId).catch((error) => {
 					console.warn(
-						`[Kaeru] Could not remove staff member ${member.user.id} from claimed ticket:`,
+						`[Kaeru] Could not remove staff member ${member.userId} from claimed ticket:`,
 						error,
 					);
 				}),
@@ -618,27 +672,3 @@ export async function closeTicketWithStatus({
 	status: string;
 	logEmoji: "ticket.bubble.done" | "ticket.bubble.stale" | "ticket.bubble.close";
 	logText: string;
-	lockThread: boolean;
-	userMessage: string;
-	comment?: string;
-}) {
-	await patchThread(
-		threadId,
-		lockThread ? { locked: true, archived: true } : { archived: true },
-	);
-	await updateTicket(ticketData, {
-		status,
-		locked: lockThread ? true : Boolean(ticketData.locked),
-		closedAt: Date.now(),
-		closedBy: userId,
-		closeReason: comment ?? null,
-	});
-	await clearActiveTicket(ticketData);
-	await sendTicketLogMessage({
-		threadId,
-		emojiPath: logEmoji,
-		content: `-# **<@!${userId}>** ${logText} ${formatRelativeTimestamp()}`,
-		comment,
-	});
-	await notifyTicketUser(ticketData, userMessage);
-}
