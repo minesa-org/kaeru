@@ -60,7 +60,7 @@ export async function refreshStaffRoster(guildId: string, staffRoleId: string) {
 			.map(normalizeStaffMember)
 			.filter(
 				(member): member is NonNullable<ReturnType<typeof normalizeStaffMember>> =>
-					Boolean(member) && member.roles.includes(staffRoleId) && member.userId !== null,
+					member !== null && member.roles.includes(staffRoleId) && member.userId !== null,
 			)
 		: [];
 
@@ -92,12 +92,14 @@ export async function getStoredStaffRoster(guildId: string, staffRoleId: string)
 		return refreshStaffRoster(guildId, staffRoleId);
 	}
 
-	return members
-		.map(normalizeStaffMember)
-		.filter(
-			(member): member is NonNullable<ReturnType<typeof normalizeStaffMember>> =>
-				Boolean(member) && member.roles.includes(staffRoleId),
-		);
+	// Stored entries were already normalized + role-filtered at write time in
+	// refreshStaffRoster ({userId, username, nick}). Re-running them through
+	// normalizeStaffMember (which expects Discord's {user, roles} shape) dropped
+	// every one to null. Just keep entries that have a userId.
+	return members.filter(
+		(member): member is { userId: string; username: string | null; nick: string | null } =>
+			typeof member?.userId === "string" && member.userId.length > 0,
+	);
 }
 
 export function buildTicketClaimButtonRow() {
@@ -469,11 +471,26 @@ export async function getRandomStaffMember(guildId: string, staffRoleId: string)
 	}
 
 	const indexKey = `staff-index:${guildId}`;
-	const index = Number(await db.get(indexKey).catch(() => 0)) || 0;
+	// MiniDatabase stores documents, not scalars: set() spreads its value into a
+	// Mongo doc and get() always returns an object|null. A bare number was dropped
+	// on write and read back as NaN -> 0, so the index never advanced. Store/read
+	// it as an object field.
+	const stored = await db.get(indexKey).catch(() => null);
+	const index = Number(stored?.index) || 0;
 	const nextIndex = index % candidates.length;
 	const selected = candidates[nextIndex];
-	await db.set(indexKey, (nextIndex + 1) % candidates.length).catch((error) => {
+	await db.set(indexKey, { index: (nextIndex + 1) % candidates.length }).catch((error) => {
 		console.warn("[Kaeru] Could not advance staff round-robin index:", error);
+	});
+
+	// ponytail: TEMPORARY debug logging — remove once round-robin is confirmed live.
+	console.info("[Kaeru][debug] round-robin", {
+		count: candidates.length,
+		ids: candidates.map((c) => c.userId),
+		usernames: candidates.map((c) => c.username ?? c.nick),
+		selected: selected.userId,
+		index,
+		nextIndex,
 	});
 
 	return selected;
@@ -672,3 +689,30 @@ export async function closeTicketWithStatus({
 	status: string;
 	logEmoji: "ticket.bubble.done" | "ticket.bubble.stale" | "ticket.bubble.close";
 	logText: string;
+	lockThread?: boolean;
+	userMessage?: string;
+	comment?: string;
+}) {
+	await patchThread(threadId, { locked: lockThread ?? true, archived: true });
+
+	await updateTicket(ticketData, {
+		status,
+		locked: lockThread ?? true,
+		closedAt: Date.now(),
+		closedBy: userId,
+		closeReason: comment?.trim() || null,
+	});
+
+	await clearActiveTicket(ticketData);
+
+	await sendTicketLogMessage({
+		threadId,
+		emojiPath: logEmoji,
+		content: `-# **<@!${userId}>** ${logText} ${formatRelativeTimestamp()}`,
+		comment,
+	});
+
+	if (userMessage) {
+		await notifyTicketUser(ticketData, userMessage);
+	}
+}
