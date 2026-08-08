@@ -13,6 +13,10 @@ export default discordOAuthCallback({
 		serverError: failedPage,
 	},
 	async onAuthorize({ user, tokens }: { user: any; tokens: any }) {
+		console.log("[OAuth] onAuthorize user:", user?.id);
+		console.log("[OAuth] token scope:", tokens?.scope);
+		console.log("[OAuth] token expires_at:", tokens?.expires_at);
+
 		const { getDatabase } = await import("../src/utils/database.js");
 		const database = getDatabase();
 
@@ -23,9 +27,13 @@ export default discordOAuthCallback({
 			scope: tokens.scope,
 		});
 
+		console.log("[OAuth] database write complete for:", user.id);
+
 		await updateDiscordMetadata(user.id, tokens.access_token);
+		console.log("[OAuth] Discord metadata updated for:", user.id);
 
 		try {
+			console.log("[OAuth] creating DM channel...");
 			const dmChannel = await fetchDiscord(
 				"/users/@me/channels",
 				process.env.DISCORD_BOT_TOKEN!,
@@ -34,8 +42,10 @@ export default discordOAuthCallback({
 				{ recipient_id: user.id },
 			);
 
+			console.log("[OAuth] DM channel result:", dmChannel?.id ?? null);
+
 			if (dmChannel?.id) {
-				await fetchDiscord(
+				const messageResponse = await fetchDiscord(
 					`/channels/${dmChannel.id}/messages`,
 					process.env.DISCORD_BOT_TOKEN!,
 					true,
@@ -62,9 +72,11 @@ export default discordOAuthCallback({
 						flags: 32768,
 					},
 				);
+
+				console.log("[OAuth] DM message sent:", messageResponse?.id ?? null);
 			}
 		} catch (dmError) {
-			console.error("Failed to send post-authorize DM:", dmError);
+			console.error("[OAuth] Failed to send post-authorize DM:", dmError);
 		}
 	},
 });
