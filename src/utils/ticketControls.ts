@@ -127,17 +127,38 @@ export function getInteractionUser(interaction: {
 	return interaction.user ?? interaction.member?.user ?? null;
 }
 
+// Discord already folds Administrator into the computed member permissions on
+// interactions, so this single bit check covers admins too.
+const MANAGE_THREADS = 1n << 34n;
+
+function hasManageThreads(rawPermissions?: string) {
+	if (!rawPermissions) return false;
+	try {
+		return (BigInt(rawPermissions) & MANAGE_THREADS) === MANAGE_THREADS;
+	} catch {
+		return false;
+	}
+}
+
 export async function canUseTicketStaffControls(
 	interaction: {
 		guild_id?: string;
 		user?: { id: string; username?: string };
-		member?: { user?: { id: string; username?: string }; roles?: string[] };
+		member?: {
+			user?: { id: string; username?: string };
+			roles?: string[];
+			permissions?: string;
+		};
 	},
 	ticketData: TicketData,
 ) {
 	const guildData = await db.get(`guild:${ticketData.guildId}`).catch(() => null);
 	const staffRoleId =
 		typeof guildData?.pingRoleId === "string" ? guildData.pingRoleId : null;
+
+	if (hasManageThreads(interaction.member?.permissions)) {
+		return { ok: true, staffRoleId };
+	}
 
 	if (!staffRoleId) {
 		return {
@@ -173,7 +194,7 @@ export async function canUseTicketStaffControls(
 
 	return {
 		ok: false,
-		message: `Only members of <@&${staffRoleId}> can manage this ticket.`,
+		message: `Only members of <@&${staffRoleId}> or users with **Manage Threads** can manage this ticket.`,
 		staffRoleId,
 	};
 }
