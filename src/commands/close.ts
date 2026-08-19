@@ -9,7 +9,7 @@ import type { CommandInteraction, InteractionCommand } from "@minesa-org/mini-in
 import { db } from "../utils/database.ts";
 import { fetchDiscord } from "../utils/discord.ts";
 import { getEmoji, sendAlertMessage } from "../utils/index.ts";
-import { clearActiveTicket } from "../utils/ticketControls.ts";
+import { clearActiveTicket, decrementStaffTicketCount } from "../utils/ticketControls.ts";
 
 const closeCommand: InteractionCommand = {
 	data: new CommandBuilder()
@@ -131,6 +131,7 @@ const closeCommand: InteractionCommand = {
 				}
 
 				await clearActiveTicket(ticketData);
+				await decrementStaffTicketCount((ticketData as Record<string, any>).guildId, (ticketData as Record<string, any>).claimedById as string);
 
 				try {
 					const cooldownDuration = 30 * 60 * 1000;
@@ -225,6 +226,7 @@ const closeCommand: InteractionCommand = {
 			);
 
 			await clearActiveTicket(ticketData);
+			await decrementStaffTicketCount((ticketData as Record<string, any>).guildId, (ticketData as Record<string, any>).claimedById as string);
 
 			try {
 				const dmChannel = await fetchDiscord(
