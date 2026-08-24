@@ -484,35 +484,6 @@ export async function removeThreadMember(threadId: string, userId: string) {
 	);
 }
 
-const STAFF_TICKET_COUNTS_KEY = "staff-ticket-counts";
-
-export async function getStaffTicketCounts(guildId: string): Promise<Record<string, number>> {
-	const data = await db.get(`${STAFF_TICKET_COUNTS_KEY}:${guildId}`).catch(() => null);
-	return data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, number>) : {};
-}
-
-export async function incrementStaffTicketCount(guildId: string, userId: string): Promise<void> {
-	const counts = await getStaffTicketCounts(guildId);
-	counts[userId] = (counts[userId] || 0) + 1;
-	await db.set(`${STAFF_TICKET_COUNTS_KEY}:${guildId}`, counts).catch((error) => {
-		console.warn("[Kaeru] Could not increment staff ticket count:", error);
-	});
-}
-
-export async function decrementStaffTicketCount(guildId: string, userId: string | undefined | null): Promise<void> {
-	if (!userId) return;
-	const counts = await getStaffTicketCounts(guildId);
-	if (counts[userId] !== undefined) {
-		counts[userId] = Math.max(0, counts[userId] - 1);
-		if (counts[userId] === 0) {
-			delete counts[userId];
-		}
-	}
-	await db.set(`${STAFF_TICKET_COUNTS_KEY}:${guildId}`, counts).catch((error) => {
-		console.warn("[Kaeru] Could not decrement staff ticket count:", error);
-	});
-}
-
 export async function getRandomStaffMember(guildId: string, staffRoleId: string) {
 	const candidates = await getStoredStaffRoster(guildId, staffRoleId);
 
@@ -520,27 +491,7 @@ export async function getRandomStaffMember(guildId: string, staffRoleId: string)
 		return null;
 	}
 
-	if (candidates.length === 1) {
-		return candidates[0];
-	}
-
-	const counts = await getStaffTicketCounts(guildId);
-
-	// Weight by inverse of (count + 1): staff with 0 tickets get weight 1,
-	// staff with 1 get weight 0.5, with 2 get weight 0.33, etc.
-	const weights = candidates.map((c) => 1 / ((counts[c.userId] || 0) + 1));
-	const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-	let roll = Math.random() * totalWeight;
-
-	for (let i = 0; i < candidates.length; i++) {
-		roll -= weights[i];
-		if (roll <= 0) {
-			return candidates[i];
-		}
-	}
-
-	// Fallback (floating-point edge case)
-	return candidates[candidates.length - 1];
+	return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 export async function assignRandomStaffMember({
@@ -566,8 +517,6 @@ export async function assignRandomStaffMember({
 	await addThreadMember(threadId, userId).catch((error) => {
 		console.warn("[Kaeru] Could not add randomly assigned staff member:", error);
 	});
-
-	await incrementStaffTicketCount(guildId, userId);
 
 	return {
 		claimedById: userId,
@@ -609,11 +558,7 @@ export async function claimTicketForStaff({
 		await removeThreadMember(threadId, previousStaffId).catch((error) => {
 			console.warn("[Kaeru] Could not remove previous claimed staff member:", error);
 		});
-		// Transfer the ticket count from the previous staff member to the new one
-		await decrementStaffTicketCount(ticketData.guildId, previousStaffId);
 	}
-
-	await incrementStaffTicketCount(ticketData.guildId, claimant.id);
 
 	return updateTicket(ticketData, {
 		claimedById: claimant.id,
@@ -747,8 +692,6 @@ export async function closeTicketWithStatus({
 	comment?: string;
 }) {
 	await patchThread(threadId, { locked: lockThread ?? true, archived: true });
-
-	await decrementStaffTicketCount(ticketData.guildId, ticketData.claimedById);
 
 	await updateTicket(ticketData, {
 		status,

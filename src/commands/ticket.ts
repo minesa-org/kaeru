@@ -15,6 +15,7 @@ import {
 	TextDisplayBuilder,
 	FileUploadBuilder,
 	MiniPermFlags,
+	ChannelType,
 } from "@minesa-org/mini-interaction";
 import type {
 	CommandInteraction,
@@ -44,6 +45,18 @@ const ticketCommand: InteractionCommand = {
 			sub
 				.setName("default")
 				.setDescription("Reset ticket system configuration to defaults"),
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setName("logs-channel")
+				.setDescription("Set the channel for timeout/moderation logs")
+				.addChannelOption((opt) =>
+					opt
+						.setName("channel")
+						.setDescription("Channel to send moderation logs to")
+						.setRequired(true)
+						.addChannelTypes(ChannelType.GuildText),
+				),
 		),
 
 	handler: async (interaction: CommandInteraction) => {
@@ -155,12 +168,30 @@ const ticketCommand: InteractionCommand = {
 						`- **Staff Role:** ${guildData.pingRoleId ? `<@&${guildData.pingRoleId}>` : "None set (pings @here)"}\n` +
 						`- **Staff Ping Mode:** ${guildData.staffPingMode === "random" ? "Random staff member" : "Staff role"}\n` +
 						`- **Ticket Channel:** ${guildData.ticketChannelId ? `<#${guildData.ticketChannelId}>` : "Default system channel"}\n` +
+						`- **Logs Channel:** ${guildData.logsChannelId ? `<#${guildData.logsChannelId}>` : "Not set"}\n` +
 						`- **Banner URL:** ${guildData.bannerUrl ? `[Link](${guildData.bannerUrl})` : "None"}\n\n` +
 						`**Description:**\n${guildData.description || "Default description"}`,
 					),
 				);
 
 			return interaction.editReply({ components: [container] });
+		}
+
+		if (subcommand === "logs-channel") {
+			await interaction.deferReply({ flags: InteractionFlags.Ephemeral });
+
+			const targetChannel = interaction.options.getChannel("channel", true)!;
+
+			const guildData = (await db.get(`guild:${guild.id}`)) || {};
+			await db.set(`guild:${guild.id}`, {
+				...guildData,
+				guildId: guild.id,
+				logsChannelId: targetChannel.id,
+			});
+
+			return interaction.editReply({
+				content: `${getEmoji("seal")} Moderation logs will now be sent to <#${targetChannel.id}>.`,
+			});
 		}
 
 		if (subcommand === "default") {
