@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/node": "^25.3.2",
     "tsx": "^4.20.6",
-    "typescript": "^6.0.2"
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "@google/genai": "^2.1.0",
